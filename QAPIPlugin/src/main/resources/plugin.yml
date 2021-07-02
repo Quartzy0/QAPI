@@ -1,0 +1,4 @@
+name: QAPI
+main: com.quartzy.qapi.QAPIPlugin
+version: 1.0-SNAPSHOT
+api-version: 1.13
