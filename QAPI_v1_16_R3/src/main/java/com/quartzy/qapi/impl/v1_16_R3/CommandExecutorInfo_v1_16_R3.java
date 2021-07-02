@@ -172,12 +172,17 @@ public class CommandExecutorInfo_v1_16_R3 implements CommandExecutorInfo{
                 }
                 return functions;
             case GAME_PROFILE:
-                GameProfile gameProfile = (GameProfile) result;
-                com.quartzy.qapi.GameProfile gameprofile = new com.quartzy.qapi.GameProfile(gameProfile.getId(), gameProfile.getName());
-                for(Map.Entry<String, Property> entry : gameProfile.getProperties().entries()){
-                    gameprofile.getProperties().put(entry.getKey(), new com.quartzy.qapi.GameProfile.Property(entry.getValue().getName(), entry.getValue().getValue(), entry.getValue().getSignature()));
+                Collection<GameProfile> gameProfileL = ((ArgumentProfile.a) result).getNames(commandContext.getSource());
+                com.quartzy.qapi.GameProfile[] gameprofiles = new com.quartzy.qapi.GameProfile[gameProfileL.size()];
+                int i2 = 0;
+                for(GameProfile gameProfile : gameProfileL){
+                    com.quartzy.qapi.GameProfile gameprofile = new com.quartzy.qapi.GameProfile(gameProfile.getId(), gameProfile.getName());
+                    for(Map.Entry<String, Property> entry : gameProfile.getProperties().entries()){
+                        gameprofile.getProperties().put(entry.getKey(), new com.quartzy.qapi.GameProfile.Property(entry.getValue().getName(), entry.getValue().getValue(), entry.getValue().getSignature()));
+                    }
+                    gameprofiles[i2++] = gameprofile;
                 }
-                return gameprofile;
+                return gameprofiles;
             case ITEM_ENCHANTMENT:
                 return new CraftEnchantment((Enchantment) result);
             case MESSAGE:
@@ -241,9 +246,9 @@ public class CommandExecutorInfo_v1_16_R3 implements CommandExecutorInfo{
                 return ScoreCriteria.INSTANCES.get(scoreboardCriteria.getName());
             case OPERATION:
                 ArgumentMathOperation.a mathOperation = (ArgumentMathOperation.a) result;
-                return (IOperation) (i1, i2) -> {
-                    ScoreContainer score1 = new ScoreContainer(i1);
-                    ScoreContainer score2 = new ScoreContainer(i2);
+                return (IOperation) (scoreIn1, scoreIn2) -> {
+                    ScoreContainer score1 = new ScoreContainer(scoreIn1);
+                    ScoreContainer score2 = new ScoreContainer(scoreIn2);
                     try{
                         mathOperation.apply(score1, score2);
                     } catch(CommandSyntaxException e){
@@ -286,6 +291,8 @@ public class CommandExecutorInfo_v1_16_R3 implements CommandExecutorInfo{
                     }
                 }
                 return axis;
+            case RESOURCE_LOCATION:
+                return CraftNamespacedKey.fromMinecraft(((MinecraftKey) result));
             default:
                 return result;
             
