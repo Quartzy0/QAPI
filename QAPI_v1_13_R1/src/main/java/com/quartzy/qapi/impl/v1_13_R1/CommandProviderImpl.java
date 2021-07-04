@@ -1,4 +1,4 @@
-package com.quartzy.qapi.impl.v1_16_R3;
+package com.quartzy.qapi.impl.v1_13_R1;
 
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.*;
@@ -6,15 +6,14 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.quartzy.qapi.command.*;
 import com.quartzy.qapi.util.Timer;
-import net.minecraft.server.v1_16_R3.*;
-import net.minecraft.server.v1_16_R3.ArgumentBlockPredicate;
-import net.minecraft.server.v1_16_R3.ArgumentItemPredicate;
-import net.minecraft.server.v1_16_R3.ArgumentItemStack;
-import net.minecraft.server.v1_16_R3.ArgumentVec2I;
-import net.minecraft.server.v1_16_R3.ArgumentVec3;
-import net.minecraft.server.v1_16_R3.EntitySelector;
+import net.minecraft.server.v1_13_R1.*;
+import net.minecraft.server.v1_13_R1.ArgumentBlockPredicate;
+import net.minecraft.server.v1_13_R1.ArgumentItemPredicate;
+import net.minecraft.server.v1_13_R1.ArgumentItemStack;
+import net.minecraft.server.v1_13_R1.ArgumentVec3;
+import net.minecraft.server.v1_13_R1.EntitySelector;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_16_R3.CraftServer;
+import org.bukkit.craftbukkit.v1_13_R1.CraftServer;
 
 import java.util.EnumSet;
 import java.util.UUID;
@@ -22,7 +21,7 @@ import java.util.UUID;
 public class CommandProviderImpl implements CommandProvider{
     @Override
     public void registerCommand(LiteralNode node){
-        DedicatedServer server = ((CraftServer) Bukkit.getServer()).getServer();
+        MinecraftServer server = ((CraftServer) Bukkit.getServer()).getServer();
         CommandDispatcher commandDispatcher = server.getCommandDispatcher();
         com.mojang.brigadier.CommandDispatcher<CommandListenerWrapper> a = commandDispatcher.a();
         a.register((LiteralArgumentBuilder<CommandListenerWrapper>) addBranch(null, node));
@@ -30,7 +29,7 @@ public class CommandProviderImpl implements CommandProvider{
     
     @Override
     public CommandSenderInfo createSenderInstance(){
-        return new CommandSenderInfo_v1_16_R3();
+        return new CommandSenderInfo_v1_13_R1();
     }
     
     @Override
@@ -46,6 +45,7 @@ public class CommandProviderImpl implements CommandProvider{
             case ITEM_SLOT:
             case TIME:
             case SCOREBOARD_SLOT:
+            case ANGLE:
                 return Integer.class;
             case LONG:
                 return Long.class;
@@ -72,8 +72,6 @@ public class CommandProviderImpl implements CommandProvider{
                 return ArgumentTileLocation.class;
             case BLOCK_PREDICATE:
                 return ArgumentBlockPredicate.b.class;
-            case ANGLE:
-                return ArgumentAngle.a.class;
             case COLOR:
                 return EnumChatFormat.class;
             case BOOLEAN:
@@ -100,7 +98,7 @@ public class CommandProviderImpl implements CommandProvider{
             case NBT_COMPOUND_TAG:
                 return NBTTagCompound.class;
             case NBT_PATH:
-                return ArgumentNBTKey.h.class;
+                return ArgumentNBTKey.c.class;
             case NBT_TAG:
                 return NBTBase.class;
             case OBJECTIVE_CRITERIA:
@@ -131,7 +129,7 @@ public class CommandProviderImpl implements CommandProvider{
         }
         if(nodeArg.getRequirement()!=null){
             argumentBuilder.requires(commandListenerWrapper -> {
-                CommandSenderInfo_v1_16_R3 t = new CommandSenderInfo_v1_16_R3();
+                CommandSenderInfo_v1_13_R1 t = new CommandSenderInfo_v1_13_R1();
                 t.setWrapper(commandListenerWrapper);
                 return nodeArg.getRequirement().test(t);
             });
@@ -139,7 +137,7 @@ public class CommandProviderImpl implements CommandProvider{
         if(nodeArg.getExecutor()!=null){
             argumentBuilder.executes(commandContext -> {
                 Timer.start();
-                CommandExecutorInfo_v1_16_R3 t = new CommandExecutorInfo_v1_16_R3();
+                CommandExecutorInfo_v1_13_R1 t = new CommandExecutorInfo_v1_13_R1();
                 t.setCommandContext(commandContext);
                 int run = nodeArg.getExecutor().run(t);
                 Timer.end();
@@ -159,6 +157,7 @@ public class CommandProviderImpl implements CommandProvider{
     public ArgumentType toNMSArgument(ArgumentNode argumentType){
         switch(argumentType.getType()){
             case STRING_WORD:
+            case UUID:
                 return StringArgumentType.word();
             case STRING_GREEDY:
                 return StringArgumentType.greedyString();
@@ -167,7 +166,8 @@ public class CommandProviderImpl implements CommandProvider{
             case INTEGER:
                 return IntegerArgumentType.integer(argumentType.getMinI(), argumentType.getMaxI());
             case LONG:
-                return LongArgumentType.longArg(argumentType.getMinL(), argumentType.getMaxL());
+                Bukkit.getLogger().warning("WARNING: Long argument type is not supported on this version! It will be automatically converted to an integer which will not allow numbers larger than an integer to be input by the user. An error might also be generated if the max or the min values are larger than Integer.MAX_VALUE (" + Integer.MAX_VALUE + ") or smaller than Integer.MIN_VALUE (" + Integer.MIN_VALUE + ") (argument '" + argumentType.getName() + "')");
+                return IntegerArgumentType.integer((int) (argumentType.getMinL()==Long.MIN_VALUE ? Integer.MIN_VALUE : argumentType.getMinL()), (int) (argumentType.getMaxL()==Long.MAX_VALUE ? Integer.MAX_VALUE : argumentType.getMaxL()));
             case FLOAT:
                 return FloatArgumentType.floatArg(argumentType.getMinF(), argumentType.getMaxF());
             case DOUBLE:
@@ -175,20 +175,19 @@ public class CommandProviderImpl implements CommandProvider{
             case BOOLEAN:
                 return BoolArgumentType.bool();
             case ENTITY:
-                return net.minecraft.server.v1_16_R3.ArgumentEntity.a();
+                return net.minecraft.server.v1_13_R1.ArgumentEntity.a();
             case ENTITIES:
-                return net.minecraft.server.v1_16_R3.ArgumentEntity.multipleEntities();
+                return net.minecraft.server.v1_13_R1.ArgumentEntity.b();
             case PLAYER:
-                return net.minecraft.server.v1_16_R3.ArgumentEntity.c();
+                return net.minecraft.server.v1_13_R1.ArgumentEntity.c();
             case PLAYERS:
-                return net.minecraft.server.v1_16_R3.ArgumentEntity.d();
+                return net.minecraft.server.v1_13_R1.ArgumentEntity.d();
             case BLOCK_POS:
                 return ArgumentPosition.a();
-            case COLUMN_POS:
-                return ArgumentVec2I.a();
             case VEC3:
                 return ArgumentVec3.a();
             case VEC2:
+            case COLUMN_POS:
                 return ArgumentVec2.a();
             case BLOCK_STATE:
                 return ArgumentTile.a();
@@ -206,9 +205,8 @@ public class CommandProviderImpl implements CommandProvider{
             case MESSAGE_SELECTORS:
                 return ArgumentChat.a();
             case NBT_COMPOUND_TAG:
-                return ArgumentNBTTag.a();
             case NBT_TAG:
-                return ArgumentNBTBase.a();
+                return ArgumentNBTTag.a();
             case NBT_PATH:
                 return ArgumentNBTKey.a();
             case OBJECTIVE:
@@ -220,7 +218,7 @@ public class CommandProviderImpl implements CommandProvider{
             case PARTICLE:
                 return ArgumentParticle.a();
             case ANGLE:
-                return ArgumentAngle.a();
+                return FloatArgumentType.floatArg(-180, 180);
             case ROTATION:
                 return ArgumentRotation.a();
             case SCOREBOARD_SLOT:
@@ -234,6 +232,7 @@ public class CommandProviderImpl implements CommandProvider{
             case ITEM_SLOT:
                 return ArgumentInventorySlot.a();
             case RESOURCE_LOCATION:
+            case DIMENSION:
                 return ArgumentMinecraftKeyRegistered.a();
             case MOB_EFFECT:
                 return ArgumentMobEffect.a();
@@ -245,12 +244,8 @@ public class CommandProviderImpl implements CommandProvider{
                 return ArgumentEnchantment.a();
             case ENTITY_SUMMON:
                 return ArgumentEntitySummon.a();
-            case DIMENSION:
-                return ArgumentDimension.a();
             case TIME:
-                return ArgumentTime.a();
-            case UUID:
-                return ArgumentUUID.a();
+                return IntegerArgumentType.integer(0);
             case GAME_PROFILE:
                 return ArgumentProfile.a();
         }

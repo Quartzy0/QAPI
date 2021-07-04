@@ -1,6 +1,7 @@
 package com.quartzy.qapi.command;
 
 import com.quartzy.qapi.QAPI;
+import com.quartzy.qapi.StringRange;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -137,11 +138,7 @@ public class CommandHandler{
                             if(finalSenderIndex!=-1)
                                 argumentValues.add(finalSenderIndex, info.sender().getSender());
                             
-                            try{
-                                declaredMethods[finalI].invoke(finalCommandInstance, argumentValues.toArray(new Object[argumentValues.size()]));
-                            } catch(IllegalAccessException | InvocationTargetException e){
-                                e.printStackTrace();
-                            }
+                            executeFunction(info, declaredMethods[finalI], finalCommandInstance, argumentValues.toArray(new Object[argumentValues.size()]));
                         }catch(Exception e){
                             e.printStackTrace();
                         }
@@ -162,12 +159,8 @@ public class CommandHandler{
     
                         if(finalSenderIndex!=-1)
                             argumentValues.add(finalSenderIndex, info.sender().getSender());
-                        
-                        try{
-                            declaredMethods[finalI].invoke(finalCommandInstance, argumentValues.toArray(new Object[argumentValues.size()]));
-                        } catch(IllegalAccessException | InvocationTargetException e){
-                            e.printStackTrace();
-                        }
+    
+                        executeFunction(info, declaredMethods[finalI], finalCommandInstance, argumentValues.toArray(new Object[argumentValues.size()]));
                     }catch(Exception e){
                         e.printStackTrace();
                     }
@@ -176,6 +169,35 @@ public class CommandHandler{
             }
         }
         QAPI.commandProvider().registerCommand(masterNode);
+    }
+    
+    private static int executeFunction(CommandExecutorInfo info, Method method, Command instance, Object... args){
+        try{
+            method.invoke(instance, args);
+        }  catch(InvocationTargetException e){
+            Throwable targetException = e.getTargetException();
+            if(targetException instanceof CommandException){
+                CommandException exception = (CommandException) targetException;
+                String message = exception.getMessage();
+                String argument = exception.getArgument();
+                StringRange argumentRange;
+                if(argument==null || (argumentRange = info.getArgumentRange(argument))==null){
+                    info.sender().getSender().sendMessage(message);
+                    return 1;
+                }
+                String commandString = info.getCommandString();
+                commandString = commandString.substring(0, argumentRange.getStart()) + ChatColor.UNDERLINE + commandString.substring(argumentRange.getStart(), argumentRange.getEnd()) + ChatColor.RESET;
+                if(commandString.length()>CommandException.ERROR_COMMAND_OUT_LENGTH){
+                    commandString = "..." + commandString.substring(commandString.length()-CommandException.ERROR_COMMAND_OUT_LENGTH+3);
+                }
+                info.sender().getSender().sendMessage(ChatColor.RED + message + "\n" + ChatColor.GRAY + commandString + ChatColor.RED + "<--[HERE]");
+            } else {
+                e.printStackTrace();
+            }
+        } catch(IllegalAccessException e){
+            e.printStackTrace();
+        }
+        return 1;
     }
     
     private static Argument findParameterByName(String name, Parameter[] parameters){

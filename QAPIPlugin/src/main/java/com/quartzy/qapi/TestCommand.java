@@ -18,13 +18,14 @@ public class TestCommand extends Command{
     
     @ArgumentExecutor(path = "target.item.amount.silent")
     public void giveItem(@Argument(name = "target", type = ArgumentTypeEnum.PLAYER) Player target,
-                         @Argument(name = "item", type = ArgumentTypeEnum.MATERIAL) Material item,
+                         @Argument(name = "item", type = ArgumentTypeEnum.ITEM_STACK) ItemStack item,
                          @Argument(name = "amount", type = ArgumentTypeEnum.INTEGER, defaultI = 23) int amount,
-                         @Argument(name = "silent", type = ArgumentTypeEnum.BOOLEAN, defaultB = BoolUnset.TRUE) boolean silent){
-        target.getInventory().addItem(new ItemStack(item, amount));
+                         @Argument(name = "silent", type = ArgumentTypeEnum.BOOLEAN, defaultB = BoolUnset.TRUE) boolean silent) throws CommandException{
+        target.getInventory().addItem(item);
         if(!silent){
-            target.sendMessage("You got " + amount + " " + item.name().toLowerCase() + (amount>1 ? "s" : "") + "!");
+            target.sendMessage("You got " + amount + " " + item.getType().name().toLowerCase() + (amount>1 ? "s" : "") + "!");
         }
+        throw new CommandException("item", "Epic command exception! Test argument: %d", 55);
     }
     
     @ArgumentExecutor(path = "target.location")
@@ -33,15 +34,15 @@ public class TestCommand extends Command{
         target.teleport(location);
     }
     
-    @ArgumentExecutor(path = "message")
-    public void giveEntitiesEffect(@Argument(name = "message", type = ArgumentTypeEnum.MESSAGE_SELECTORS) String message,
-                                   @Sender Player sender){
-        Bukkit.broadcastMessage(message + " (This message was brought to you by our sponsor, " + sender.getName() + ")");
-    }
+//    @ArgumentExecutor(path = "message")
+//    public void giveEntitiesEffect(@Argument(name = "message", type = ArgumentTypeEnum.MESSAGE_SELECTORS) String message,
+//                                   @Sender Player sender) {
+//        Bukkit.broadcastMessage(message + " (This message was brought to you by our sponsor, " + sender.getName() + ")");
+//    }
     
     @ArgumentExecutor(path = "manytest.block.item.blockp.itemp.profile.bpos.cpos.vec3.vec2.color.resloc.angle.rot")
     public void multiArgumentTest(@Argument(name = "block", type = ArgumentTypeEnum.BLOCK_STATE)BlockData blockData,
-                                  @Argument(name = "item", type = ArgumentTypeEnum.MATERIAL)Material material,
+                                  @Argument(name = "item", type = ArgumentTypeEnum.ITEM_STACK)Material material,
                                   @Argument(name = "blockp", type = ArgumentTypeEnum.BLOCK_PREDICATE)Predicate<BlockState> state,
                                   @Argument(name = "itemp", type = ArgumentTypeEnum.ITEM_PREDICATE)Predicate<ItemStack> itemStackPredicate,
                                   @Argument(name = "profile", type = ArgumentTypeEnum.GAME_PROFILE) GameProfile[] gameProfile,

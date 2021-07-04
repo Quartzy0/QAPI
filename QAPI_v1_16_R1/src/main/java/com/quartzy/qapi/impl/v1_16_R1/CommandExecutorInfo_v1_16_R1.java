@@ -1,4 +1,4 @@
-package com.quartzy.qapi.impl.v1_16_R3;
+package com.quartzy.qapi.impl.v1_16_R1;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
@@ -11,44 +11,38 @@ import com.quartzy.qapi.command.ArgumentTypeEnum;
 import com.quartzy.qapi.command.CommandExecutorInfo;
 import com.quartzy.qapi.command.CommandSenderInfo;
 import lombok.SneakyThrows;
-import net.minecraft.server.v1_16_R3.*;
-import net.minecraft.server.v1_16_R3.Vec2F;
-import net.minecraft.server.v1_16_R3.Vec3D;
+import net.minecraft.server.v1_16_R1.*;
+import net.minecraft.server.v1_16_R1.Vec2F;
+import net.minecraft.server.v1_16_R1.Vec3D;
 import org.bukkit.*;
 import org.bukkit.Particle;
 import org.bukkit.block.*;
-import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_16_R3.block.data.CraftBlockData;
-import org.bukkit.craftbukkit.v1_16_R3.enchantments.CraftEnchantment;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
-import org.bukkit.craftbukkit.v1_16_R3.potion.CraftPotionEffectType;
-import org.bukkit.craftbukkit.v1_16_R3.util.CraftChatMessage;
-import org.bukkit.craftbukkit.v1_16_R3.util.CraftNamespacedKey;
+import org.bukkit.craftbukkit.v1_16_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R1.block.data.CraftBlockData;
+import org.bukkit.craftbukkit.v1_16_R1.enchantments.CraftEnchantment;
+import org.bukkit.craftbukkit.v1_16_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_16_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_16_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_16_R1.potion.CraftPotionEffectType;
+import org.bukkit.craftbukkit.v1_16_R1.util.CraftChatMessage;
+import org.bukkit.craftbukkit.v1_16_R1.util.CraftNamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Predicate;
 
-public class CommandExecutorInfo_v1_16_R3 implements CommandExecutorInfo{
-    private CommandSenderInfo_v1_16_R3 senderInfo;
+public class CommandExecutorInfo_v1_16_R1 implements CommandExecutorInfo{
+    private CommandSenderInfo_v1_16_R1 senderInfo;
     private CommandContext<CommandListenerWrapper> commandContext;
     
     private static Field argumentsField;
     
-    private static Field mobEffectField;
-    private static Method mobEffectNameMethod;
-    private static Field mobEffectAttributesField;
-    
     public void setCommandContext(CommandContext<CommandListenerWrapper> commandContext){
         this.commandContext = commandContext;
-        this.senderInfo = new CommandSenderInfo_v1_16_R3();
+        this.senderInfo = new CommandSenderInfo_v1_16_R1();
         this.senderInfo.setWrapper(commandContext.getSource());
     }
     
@@ -68,7 +62,7 @@ public class CommandExecutorInfo_v1_16_R3 implements CommandExecutorInfo{
                 e.printStackTrace();
             }
         }
-    
+        
         Map<String, ParsedArgument<CommandListenerWrapper, ?>> map = null;
         try{
             map = (Map<String, ParsedArgument<CommandListenerWrapper, ?>>) argumentsField.get(commandContext);
@@ -76,7 +70,7 @@ public class CommandExecutorInfo_v1_16_R3 implements CommandExecutorInfo{
             e.printStackTrace();
         }
         if(map==null)return null;
-    
+        
         ParsedArgument<CommandListenerWrapper, ?> parsedArgument = map.get(argumentName);
         if(parsedArgument==null)return null;
         Object result = parsedArgument.getResult();
@@ -111,7 +105,7 @@ public class CommandExecutorInfo_v1_16_R3 implements CommandExecutorInfo{
                 return CraftItemStack.asNewCraftStack(itemStack.a());
             case ITEM_PREDICATE:
                 ArgumentItemPredicate.b itemPredicate = (ArgumentItemPredicate.b) result;
-                Predicate<net.minecraft.server.v1_16_R3.ItemStack> itemStackPredicate = itemPredicate.create(commandContext);
+                Predicate<net.minecraft.server.v1_16_R1.ItemStack> itemStackPredicate = itemPredicate.create(commandContext);
                 return (Predicate<ItemStack>) itemStack1 -> itemStackPredicate.test(CraftItemStack.asNMSCopy(itemStack1));
             case BLOCK_POS:
             case COLUMN_POS:
@@ -142,9 +136,6 @@ public class CommandExecutorInfo_v1_16_R3 implements CommandExecutorInfo{
                     }
                     return shapeDetectorBlockPredicate.test(shapeDetectorBlock);
                 };
-            case ANGLE:
-                ArgumentAngle.a argumentAngle = (ArgumentAngle.a) result;
-                return argumentAngle.a(commandContext.getSource());
             case COLOR:
                 return ChatColor.getByChar(((EnumChatFormat) result).character);
             case COMPONENT:
@@ -188,51 +179,8 @@ public class CommandExecutorInfo_v1_16_R3 implements CommandExecutorInfo{
             case MESSAGE_SELECTORS:
                 return CraftChatMessage.fromComponent(((ArgumentChat.a) result).a(commandContext.getSource(), true));
             case MOB_EFFECT:
-                if(mobEffectField==null){
-                    mobEffectField = MobEffectList.class.getDeclaredField("b");
-                    mobEffectField.setAccessible(true);
-                }
-                if(mobEffectAttributesField==null){
-                    mobEffectAttributesField = MobEffectList.class.getDeclaredField("a");
-                    mobEffectAttributesField.setAccessible(true);
-                }
-                
                 MobEffectList mobEffectList = (MobEffectList) result;
                 return new CraftPotionEffectType(mobEffectList);
-                /*EffectType effectType = EffectType.NEUTRAL;
-                MobEffectInfo o = (MobEffectInfo) mobEffectField.get(mobEffectList);
-                switch(o){
-                    case BENEFICIAL:
-                        effectType = EffectType.BENEFICIAL;
-                        break;
-                    case HARMFUL:
-                        effectType = EffectType.HARMFUL;
-                        break;
-                    case NEUTRAL:
-                        effectType = EffectType.NEUTRAL;
-                        break;
-                }
-                com.quartzy.qapi.Effect effect = new com.quartzy.qapi.Effect(effectType, mobEffectList.getColor(), getMobEffectName(mobEffectList));
-                Map<AttributeBase, AttributeModifier> attributeMap = (Map<AttributeBase, AttributeModifier>) mobEffectAttributesField.get(mobEffectList);
-                for(Map.Entry<AttributeBase, AttributeModifier> entry : attributeMap.entrySet()){
-                    Attribute attribute = new Attribute(entry.getKey().getName(), entry.getKey().getDefault()).setShouldWatch(entry.getKey().b());
-                    AttributeModifier.Operation operation = entry.getValue().getOperation();
-                    com.quartzy.qapi.AttributeModifier.Operation operation1 = com.quartzy.qapi.AttributeModifier.Operation.ADDITION;
-                    switch(operation){
-                        case ADDITION:
-                            operation1 = com.quartzy.qapi.AttributeModifier.Operation.ADDITION;
-                            break;
-                        case MULTIPLY_BASE:
-                            operation1 = com.quartzy.qapi.AttributeModifier.Operation.MULTIPLY_BASE;
-                            break;
-                        case MULTIPLY_TOTAL:
-                            operation1 = com.quartzy.qapi.AttributeModifier.Operation.MULTIPLY_TOTAL;
-                            break;
-                    }
-                    com.quartzy.qapi.AttributeModifier attributeModifier = new com.quartzy.qapi.AttributeModifier(entry.getValue().getUniqueId(), entry.getValue().getName(), entry.getValue().getAmount(), operation1);
-                    effect.getAttributeModifierMap().put(attribute, attributeModifier);
-                }
-                return effect;*/
             case NBT_COMPOUND_TAG:
                 return ((NBTProviderImpl) QAPI.nbtProvider()).fromNMS(((NBTTagCompound) result));
             case NBT_TAG:
@@ -333,7 +281,7 @@ public class CommandExecutorInfo_v1_16_R3 implements CommandExecutorInfo{
                 e.printStackTrace();
             }
         }
-    
+        
         Map<String, ParsedArgument<CommandListenerWrapper, ?>> map = null;
         try{
             map = (Map<String, ParsedArgument<CommandListenerWrapper, ?>>) argumentsField.get(context);
@@ -344,52 +292,35 @@ public class CommandExecutorInfo_v1_16_R3 implements CommandExecutorInfo{
         return map.get(argumentName);
     }
     
-    private static String getMobEffectName(MobEffectList effect){
-        if(mobEffectNameMethod==null){
-            try{
-                mobEffectNameMethod = MobEffectList.class.getDeclaredMethod("b");
-                mobEffectNameMethod.setAccessible(true);
-            } catch(NoSuchMethodException e){
-                e.printStackTrace();
-            }
-        }
-        try{
-            return (String) mobEffectNameMethod.invoke(effect);
-        } catch(IllegalAccessException | InvocationTargetException e){
-            e.printStackTrace();
-        }
-        return null;
-    }
-    
     private static class ScoreContainer extends ScoreboardScore{
         
         private int score;
-    
+        
         public ScoreContainer(int score){
             super(null, null, null);
             this.score = score;
         }
-    
+        
         @Override
         public void addScore(int var0){
             this.score+=var0;
         }
-    
+        
         @Override
         public void incrementScore(){
             this.score++;
         }
-    
+        
         @Override
         public int getScore(){
             return this.score;
         }
-    
+        
         @Override
         public void c(){
             this.score = 0;
         }
-    
+        
         @Override
         public void setScore(int var0){
             this.score = var0;

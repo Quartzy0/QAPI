@@ -175,7 +175,7 @@ public class NBTProviderImpl implements NBTProvider{
         return NBTTagEnd.b;
     }
     
-    private NBTBase fromNMS(net.minecraft.server.v1_16_R2.NBTBase base){
+    public NBTBase fromNMS(net.minecraft.server.v1_16_R2.NBTBase base){
         if(base==null)return null;
         switch(base.getTypeId()){
             case CraftMagicNumbers.NBT.TAG_BYTE:

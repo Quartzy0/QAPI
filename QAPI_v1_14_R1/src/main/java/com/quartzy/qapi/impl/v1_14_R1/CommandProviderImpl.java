@@ -1,4 +1,4 @@
-package com.quartzy.qapi.impl.v1_16_R3;
+package com.quartzy.qapi.impl.v1_14_R1;
 
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.*;
@@ -6,15 +6,15 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.quartzy.qapi.command.*;
 import com.quartzy.qapi.util.Timer;
-import net.minecraft.server.v1_16_R3.*;
-import net.minecraft.server.v1_16_R3.ArgumentBlockPredicate;
-import net.minecraft.server.v1_16_R3.ArgumentItemPredicate;
-import net.minecraft.server.v1_16_R3.ArgumentItemStack;
-import net.minecraft.server.v1_16_R3.ArgumentVec2I;
-import net.minecraft.server.v1_16_R3.ArgumentVec3;
-import net.minecraft.server.v1_16_R3.EntitySelector;
+import net.minecraft.server.v1_14_R1.*;
+import net.minecraft.server.v1_14_R1.ArgumentBlockPredicate;
+import net.minecraft.server.v1_14_R1.ArgumentItemPredicate;
+import net.minecraft.server.v1_14_R1.ArgumentItemStack;
+import net.minecraft.server.v1_14_R1.ArgumentVec2I;
+import net.minecraft.server.v1_14_R1.ArgumentVec3;
+import net.minecraft.server.v1_14_R1.EntitySelector;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_16_R3.CraftServer;
+import org.bukkit.craftbukkit.v1_14_R1.CraftServer;
 
 import java.util.EnumSet;
 import java.util.UUID;
@@ -30,7 +30,7 @@ public class CommandProviderImpl implements CommandProvider{
     
     @Override
     public CommandSenderInfo createSenderInstance(){
-        return new CommandSenderInfo_v1_16_R3();
+        return new CommandSenderInfo_v1_14_R1();
     }
     
     @Override
@@ -46,6 +46,7 @@ public class CommandProviderImpl implements CommandProvider{
             case ITEM_SLOT:
             case TIME:
             case SCOREBOARD_SLOT:
+            case ANGLE:
                 return Integer.class;
             case LONG:
                 return Long.class;
@@ -72,8 +73,6 @@ public class CommandProviderImpl implements CommandProvider{
                 return ArgumentTileLocation.class;
             case BLOCK_PREDICATE:
                 return ArgumentBlockPredicate.b.class;
-            case ANGLE:
-                return ArgumentAngle.a.class;
             case COLOR:
                 return EnumChatFormat.class;
             case BOOLEAN:
@@ -131,7 +130,7 @@ public class CommandProviderImpl implements CommandProvider{
         }
         if(nodeArg.getRequirement()!=null){
             argumentBuilder.requires(commandListenerWrapper -> {
-                CommandSenderInfo_v1_16_R3 t = new CommandSenderInfo_v1_16_R3();
+                CommandSenderInfo_v1_14_R1 t = new CommandSenderInfo_v1_14_R1();
                 t.setWrapper(commandListenerWrapper);
                 return nodeArg.getRequirement().test(t);
             });
@@ -139,7 +138,7 @@ public class CommandProviderImpl implements CommandProvider{
         if(nodeArg.getExecutor()!=null){
             argumentBuilder.executes(commandContext -> {
                 Timer.start();
-                CommandExecutorInfo_v1_16_R3 t = new CommandExecutorInfo_v1_16_R3();
+                CommandExecutorInfo_v1_14_R1 t = new CommandExecutorInfo_v1_14_R1();
                 t.setCommandContext(commandContext);
                 int run = nodeArg.getExecutor().run(t);
                 Timer.end();
@@ -159,6 +158,7 @@ public class CommandProviderImpl implements CommandProvider{
     public ArgumentType toNMSArgument(ArgumentNode argumentType){
         switch(argumentType.getType()){
             case STRING_WORD:
+            case UUID:
                 return StringArgumentType.word();
             case STRING_GREEDY:
                 return StringArgumentType.greedyString();
@@ -175,13 +175,13 @@ public class CommandProviderImpl implements CommandProvider{
             case BOOLEAN:
                 return BoolArgumentType.bool();
             case ENTITY:
-                return net.minecraft.server.v1_16_R3.ArgumentEntity.a();
+                return net.minecraft.server.v1_14_R1.ArgumentEntity.a();
             case ENTITIES:
-                return net.minecraft.server.v1_16_R3.ArgumentEntity.multipleEntities();
+                return net.minecraft.server.v1_14_R1.ArgumentEntity.multipleEntities();
             case PLAYER:
-                return net.minecraft.server.v1_16_R3.ArgumentEntity.c();
+                return net.minecraft.server.v1_14_R1.ArgumentEntity.c();
             case PLAYERS:
-                return net.minecraft.server.v1_16_R3.ArgumentEntity.d();
+                return net.minecraft.server.v1_14_R1.ArgumentEntity.d();
             case BLOCK_POS:
                 return ArgumentPosition.a();
             case COLUMN_POS:
@@ -220,7 +220,7 @@ public class CommandProviderImpl implements CommandProvider{
             case PARTICLE:
                 return ArgumentParticle.a();
             case ANGLE:
-                return ArgumentAngle.a();
+                return FloatArgumentType.floatArg(-180, 180);
             case ROTATION:
                 return ArgumentRotation.a();
             case SCOREBOARD_SLOT:
@@ -249,8 +249,6 @@ public class CommandProviderImpl implements CommandProvider{
                 return ArgumentDimension.a();
             case TIME:
                 return ArgumentTime.a();
-            case UUID:
-                return ArgumentUUID.a();
             case GAME_PROFILE:
                 return ArgumentProfile.a();
         }

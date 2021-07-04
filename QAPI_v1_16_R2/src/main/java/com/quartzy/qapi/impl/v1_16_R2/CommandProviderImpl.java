@@ -1,4 +1,4 @@
-package com.quartzy.qapi.impl.v1_16_R3;
+package com.quartzy.qapi.impl.v1_16_R2;
 
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.*;
@@ -6,15 +6,15 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.quartzy.qapi.command.*;
 import com.quartzy.qapi.util.Timer;
-import net.minecraft.server.v1_16_R3.*;
-import net.minecraft.server.v1_16_R3.ArgumentBlockPredicate;
-import net.minecraft.server.v1_16_R3.ArgumentItemPredicate;
-import net.minecraft.server.v1_16_R3.ArgumentItemStack;
-import net.minecraft.server.v1_16_R3.ArgumentVec2I;
-import net.minecraft.server.v1_16_R3.ArgumentVec3;
-import net.minecraft.server.v1_16_R3.EntitySelector;
+import net.minecraft.server.v1_16_R2.*;
+import net.minecraft.server.v1_16_R2.ArgumentBlockPredicate;
+import net.minecraft.server.v1_16_R2.ArgumentItemPredicate;
+import net.minecraft.server.v1_16_R2.ArgumentItemStack;
+import net.minecraft.server.v1_16_R2.ArgumentVec2I;
+import net.minecraft.server.v1_16_R2.ArgumentVec3;
+import net.minecraft.server.v1_16_R2.EntitySelector;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_16_R3.CraftServer;
+import org.bukkit.craftbukkit.v1_16_R2.CraftServer;
 
 import java.util.EnumSet;
 import java.util.UUID;
@@ -30,7 +30,7 @@ public class CommandProviderImpl implements CommandProvider{
     
     @Override
     public CommandSenderInfo createSenderInstance(){
-        return new CommandSenderInfo_v1_16_R3();
+        return new CommandSenderInfo_v1_16_R2();
     }
     
     @Override
@@ -131,7 +131,7 @@ public class CommandProviderImpl implements CommandProvider{
         }
         if(nodeArg.getRequirement()!=null){
             argumentBuilder.requires(commandListenerWrapper -> {
-                CommandSenderInfo_v1_16_R3 t = new CommandSenderInfo_v1_16_R3();
+                CommandSenderInfo_v1_16_R2 t = new CommandSenderInfo_v1_16_R2();
                 t.setWrapper(commandListenerWrapper);
                 return nodeArg.getRequirement().test(t);
             });
@@ -139,7 +139,7 @@ public class CommandProviderImpl implements CommandProvider{
         if(nodeArg.getExecutor()!=null){
             argumentBuilder.executes(commandContext -> {
                 Timer.start();
-                CommandExecutorInfo_v1_16_R3 t = new CommandExecutorInfo_v1_16_R3();
+                CommandExecutorInfo_v1_16_R2 t = new CommandExecutorInfo_v1_16_R2();
                 t.setCommandContext(commandContext);
                 int run = nodeArg.getExecutor().run(t);
                 Timer.end();
@@ -175,13 +175,13 @@ public class CommandProviderImpl implements CommandProvider{
             case BOOLEAN:
                 return BoolArgumentType.bool();
             case ENTITY:
-                return net.minecraft.server.v1_16_R3.ArgumentEntity.a();
+                return net.minecraft.server.v1_16_R2.ArgumentEntity.a();
             case ENTITIES:
-                return net.minecraft.server.v1_16_R3.ArgumentEntity.multipleEntities();
+                return net.minecraft.server.v1_16_R2.ArgumentEntity.multipleEntities();
             case PLAYER:
-                return net.minecraft.server.v1_16_R3.ArgumentEntity.c();
+                return net.minecraft.server.v1_16_R2.ArgumentEntity.c();
             case PLAYERS:
-                return net.minecraft.server.v1_16_R3.ArgumentEntity.d();
+                return net.minecraft.server.v1_16_R2.ArgumentEntity.d();
             case BLOCK_POS:
                 return ArgumentPosition.a();
             case COLUMN_POS:

@@ -130,7 +130,7 @@ public class NBTProviderImpl implements NBTProvider{
         return (NBTCompound) fromNMS(tagNMS);
     }
     
-    private net.minecraft.server.v1_16_R1.NBTBase toNMSTag(NBTBase tag){
+    public net.minecraft.server.v1_16_R1.NBTBase toNMSTag(NBTBase tag){
         if(tag==null)return null;
         switch(getTagId(tag.getClass())){
             case CraftMagicNumbers.NBT.TAG_INT:
@@ -174,7 +174,7 @@ public class NBTProviderImpl implements NBTProvider{
         return NBTTagEnd.b;
     }
     
-    private NBTBase fromNMS(net.minecraft.server.v1_16_R1.NBTBase base){
+    public NBTBase fromNMS(net.minecraft.server.v1_16_R1.NBTBase base){
         if(base==null)return null;
         switch(base.getTypeId()){
             case CraftMagicNumbers.NBT.TAG_BYTE:
