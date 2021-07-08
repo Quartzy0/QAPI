@@ -7,6 +7,7 @@ import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.quartzy.qapi.*;
 import com.quartzy.qapi.Axis;
+import com.quartzy.qapi.NamespacedKey;
 import com.quartzy.qapi.command.ArgumentTypeEnum;
 import com.quartzy.qapi.command.CommandExecutorInfo;
 import com.quartzy.qapi.command.CommandSenderInfo;
@@ -158,7 +159,7 @@ public class CommandExecutorInfo_v1_13_R1 implements CommandExecutorInfo{
                 NamespacedKey[] functions = new NamespacedKey[a.size()];
                 int i = 0;
                 for(CustomFunction customFunction : a){
-                    functions[i++] = CraftNamespacedKey.fromMinecraft(customFunction.a());
+                    functions[i++] = new NamespacedKey(customFunction.a().b(), customFunction.a().getKey());
                 }
                 return functions;
             case GAME_PROFILE:
@@ -239,7 +240,7 @@ public class CommandExecutorInfo_v1_13_R1 implements CommandExecutorInfo{
                 }
                 return axis;
             case RESOURCE_LOCATION:
-                return CraftNamespacedKey.fromMinecraft(((MinecraftKey) result));
+                return new NamespacedKey(((MinecraftKey) result).b(), ((MinecraftKey) result).getKey());
             case UUID:
                 return UUID.fromString(((String) result));
             default:

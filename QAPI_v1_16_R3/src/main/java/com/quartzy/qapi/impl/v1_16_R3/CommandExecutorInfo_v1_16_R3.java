@@ -7,6 +7,7 @@ import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.quartzy.qapi.*;
 import com.quartzy.qapi.Axis;
+import com.quartzy.qapi.NamespacedKey;
 import com.quartzy.qapi.command.ArgumentTypeEnum;
 import com.quartzy.qapi.command.CommandExecutorInfo;
 import com.quartzy.qapi.command.CommandSenderInfo;
@@ -18,6 +19,8 @@ import org.bukkit.*;
 import org.bukkit.Particle;
 import org.bukkit.block.*;
 import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R3.block.CraftBlock;
+import org.bukkit.craftbukkit.v1_16_R3.block.CraftBlockState;
 import org.bukkit.craftbukkit.v1_16_R3.block.data.CraftBlockData;
 import org.bukkit.craftbukkit.v1_16_R3.enchantments.CraftEnchantment;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
@@ -124,7 +127,7 @@ public class CommandExecutorInfo_v1_16_R3 implements CommandExecutorInfo{
                 return new Location(commandContext.getSource().getWorld().getWorld(), c.x, c.y, c.z, d.i, d.j);
             case BLOCK_STATE:
                 ArgumentTileLocation argumentTileLocation = (ArgumentTileLocation) result;
-                return CraftBlockData.fromData(argumentTileLocation.a());
+                return CraftBlockData.fromData(argumentTileLocation.a()).getMaterial();
             case BLOCK_PREDICATE:
                 ArgumentBlockPredicate.b argumentBlockPredicate = (ArgumentBlockPredicate.b) result;
                 Predicate<ShapeDetectorBlock> shapeDetectorBlockPredicate = argumentBlockPredicate.create(commandContext.getSource().getServer().getTagRegistry());
@@ -166,7 +169,7 @@ public class CommandExecutorInfo_v1_16_R3 implements CommandExecutorInfo{
                 NamespacedKey[] functions = new NamespacedKey[a.size()];
                 int i = 0;
                 for(CustomFunction customFunction : a){
-                    functions[i++] = CraftNamespacedKey.fromMinecraft(customFunction.a());
+                    functions[i++] = new NamespacedKey(customFunction.a().getNamespace(), customFunction.a().getKey());
                 }
                 return functions;
             case GAME_PROFILE:
@@ -290,7 +293,7 @@ public class CommandExecutorInfo_v1_16_R3 implements CommandExecutorInfo{
                 }
                 return axis;
             case RESOURCE_LOCATION:
-                return CraftNamespacedKey.fromMinecraft(((MinecraftKey) result));
+                return new NamespacedKey(((MinecraftKey) result).getNamespace(), ((MinecraftKey) result).getKey());
             default:
                 return result;
             

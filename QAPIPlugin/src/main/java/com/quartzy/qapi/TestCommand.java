@@ -1,9 +1,10 @@
 package com.quartzy.qapi;
 
 import com.quartzy.qapi.command.*;
-import org.bukkit.*;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.BlockState;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -41,8 +42,8 @@ public class TestCommand extends Command{
 //    }
     
     @ArgumentExecutor(path = "manytest.block.item.blockp.itemp.profile.bpos.cpos.vec3.vec2.color.resloc.angle.rot")
-    public void multiArgumentTest(@Argument(name = "block", type = ArgumentTypeEnum.BLOCK_STATE)BlockData blockData,
-                                  @Argument(name = "item", type = ArgumentTypeEnum.ITEM_STACK)Material material,
+    public void multiArgumentTest(@Argument(name = "block", type = ArgumentTypeEnum.BLOCK_STATE)Material blockData,
+                                  @Argument(name = "item", type = ArgumentTypeEnum.ITEM_STACK) Material material,
                                   @Argument(name = "blockp", type = ArgumentTypeEnum.BLOCK_PREDICATE)Predicate<BlockState> state,
                                   @Argument(name = "itemp", type = ArgumentTypeEnum.ITEM_PREDICATE)Predicate<ItemStack> itemStackPredicate,
                                   @Argument(name = "profile", type = ArgumentTypeEnum.GAME_PROFILE) GameProfile[] gameProfile,
@@ -56,7 +57,7 @@ public class TestCommand extends Command{
                                   @Argument(name = "rot", type = ArgumentTypeEnum.ROTATION) Location rotation){
         if(blockData==null || material==null || state==null || itemStackPredicate==null || gameProfile == null || location == null || cLocation == null || vec3 == null || vec2 == null || color == null || key == null || angle<-180f || angle>180f || rotation == null)
             throw new NullPointerException("An argument in a test method was null. Something went wrong");
-        System.out.println("BlockData: " + blockData.getAsString());
+        System.out.println("BlockData: " + blockData.name());
         System.out.println("Material: " + material.name());
         System.out.println("GameProfile: " + Arrays.toString(gameProfile));
         System.out.println("BlockPos: " + location.toString());
