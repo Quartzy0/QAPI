@@ -17,6 +17,7 @@ import org.bukkit.inventory.ItemStack;
 import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -136,7 +137,7 @@ public class NBTProviderImpl implements NBTProvider{
         return CraftItemStack.asBukkitCopy(itemStack1);
     }
     
-    private net.minecraft.server.v1_8_R1.NBTBase toNMSTag(NBTBase tag){
+    public net.minecraft.server.v1_8_R1.NBTBase toNMSTag(NBTBase tag){
         if(tag==null)return null;
         switch(getTagId(tag.getClass())){
             case 3:
@@ -185,7 +186,7 @@ public class NBTProviderImpl implements NBTProvider{
         return createEndTag();
     }
     
-    private NBTBase fromNMS(net.minecraft.server.v1_8_R1.NBTBase base){
+    public NBTBase fromNMS(net.minecraft.server.v1_8_R1.NBTBase base){
         if(base==null)return null;
         switch(base.getTypeId()){
             case 1:
@@ -223,7 +224,7 @@ public class NBTProviderImpl implements NBTProvider{
                 return new NBTListLong(values);
             case 9:
                 NBTTagList nbtList = (NBTTagList) base;
-                NBTListTag nbtListTag = new NBTListTag(Collections.emptyList(), (byte) nbtList.f());
+                NBTListTag nbtListTag = new NBTListTag(new ArrayList<>(), (byte) nbtList.f());
                 for(int i = 0; i < nbtList.size(); i++){
                     nbtListTag.add(fromNMS(nbtList.g(i)));
                 }

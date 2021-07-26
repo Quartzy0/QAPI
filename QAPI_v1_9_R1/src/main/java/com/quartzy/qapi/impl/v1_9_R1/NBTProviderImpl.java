@@ -17,6 +17,7 @@ import org.bukkit.inventory.ItemStack;
 import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -223,7 +224,7 @@ public class NBTProviderImpl implements NBTProvider{
                 return new NBTListLong(values);
             case 9:
                 NBTTagList nbtList = (NBTTagList) base;
-                NBTListTag nbtListTag = new NBTListTag(Collections.emptyList(), (byte) nbtList.d());
+                NBTListTag nbtListTag = new NBTListTag(new ArrayList<>(), (byte) nbtList.d());
                 for(int i = 0; i < nbtList.size(); i++){
                     nbtListTag.add(fromNMS(nbtList.h(i)));
                 }

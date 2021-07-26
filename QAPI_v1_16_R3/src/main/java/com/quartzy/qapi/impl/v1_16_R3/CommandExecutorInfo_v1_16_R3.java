@@ -11,7 +11,10 @@ import com.quartzy.qapi.NamespacedKey;
 import com.quartzy.qapi.command.ArgumentTypeEnum;
 import com.quartzy.qapi.command.CommandExecutorInfo;
 import com.quartzy.qapi.command.CommandSenderInfo;
+import com.quartzy.qapi.nbt.NBTPath;
 import lombok.SneakyThrows;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.chat.BaseComponentSerializer;
 import net.minecraft.server.v1_16_R3.*;
 import net.minecraft.server.v1_16_R3.Vec2F;
 import net.minecraft.server.v1_16_R3.Vec3D;
@@ -19,8 +22,6 @@ import org.bukkit.*;
 import org.bukkit.Particle;
 import org.bukkit.block.*;
 import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_16_R3.block.CraftBlock;
-import org.bukkit.craftbukkit.v1_16_R3.block.CraftBlockState;
 import org.bukkit.craftbukkit.v1_16_R3.block.data.CraftBlockData;
 import org.bukkit.craftbukkit.v1_16_R3.enchantments.CraftEnchantment;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
@@ -28,7 +29,6 @@ import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_16_R3.potion.CraftPotionEffectType;
 import org.bukkit.craftbukkit.v1_16_R3.util.CraftChatMessage;
-import org.bukkit.craftbukkit.v1_16_R3.util.CraftNamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -174,16 +174,15 @@ public class CommandExecutorInfo_v1_16_R3 implements CommandExecutorInfo{
                 return functions;
             case GAME_PROFILE:
                 Collection<GameProfile> gameProfileL = ((ArgumentProfile.a) result).getNames(commandContext.getSource());
-                com.quartzy.qapi.GameProfile[] gameprofiles = new com.quartzy.qapi.GameProfile[gameProfileL.size()];
-                int i2 = 0;
-                for(GameProfile gameProfile : gameProfileL){
-                    com.quartzy.qapi.GameProfile gameprofile = new com.quartzy.qapi.GameProfile(gameProfile.getId(), gameProfile.getName());
-                    for(Map.Entry<String, Property> entry : gameProfile.getProperties().entries()){
-                        gameprofile.getProperties().put(entry.getKey(), new com.quartzy.qapi.GameProfile.Property(entry.getValue().getName(), entry.getValue().getValue(), entry.getValue().getSignature()));
+                com.quartzy.qapi.GameProfile[] profiles1 = new com.quartzy.qapi.GameProfile[gameProfileL.size()];
+                int i6 = 0;
+                for(GameProfile profile : gameProfileL){
+                    profiles1[i6] = new com.quartzy.qapi.GameProfile(profile.getId(), profile.getName());
+                    for(Map.Entry<String, Property> entry : profile.getProperties().entries()){
+                        profiles1[i6++].getProperties().put(entry.getKey(), new com.quartzy.qapi.GameProfile.Property(entry.getValue().getName(), entry.getValue().getValue(), entry.getValue().getSignature()));
                     }
-                    gameprofiles[i2++] = gameprofile;
                 }
-                return gameprofiles;
+                return profiles1;
             case ITEM_ENCHANTMENT:
                 return new CraftEnchantment((Enchantment) result);
             case MESSAGE:
@@ -191,57 +190,14 @@ public class CommandExecutorInfo_v1_16_R3 implements CommandExecutorInfo{
             case MESSAGE_SELECTORS:
                 return CraftChatMessage.fromComponent(((ArgumentChat.a) result).a(commandContext.getSource(), true));
             case MOB_EFFECT:
-                if(mobEffectField==null){
-                    mobEffectField = MobEffectList.class.getDeclaredField("b");
-                    mobEffectField.setAccessible(true);
-                }
-                if(mobEffectAttributesField==null){
-                    mobEffectAttributesField = MobEffectList.class.getDeclaredField("a");
-                    mobEffectAttributesField.setAccessible(true);
-                }
-                
                 MobEffectList mobEffectList = (MobEffectList) result;
                 return new CraftPotionEffectType(mobEffectList);
-                /*EffectType effectType = EffectType.NEUTRAL;
-                MobEffectInfo o = (MobEffectInfo) mobEffectField.get(mobEffectList);
-                switch(o){
-                    case BENEFICIAL:
-                        effectType = EffectType.BENEFICIAL;
-                        break;
-                    case HARMFUL:
-                        effectType = EffectType.HARMFUL;
-                        break;
-                    case NEUTRAL:
-                        effectType = EffectType.NEUTRAL;
-                        break;
-                }
-                com.quartzy.qapi.Effect effect = new com.quartzy.qapi.Effect(effectType, mobEffectList.getColor(), getMobEffectName(mobEffectList));
-                Map<AttributeBase, AttributeModifier> attributeMap = (Map<AttributeBase, AttributeModifier>) mobEffectAttributesField.get(mobEffectList);
-                for(Map.Entry<AttributeBase, AttributeModifier> entry : attributeMap.entrySet()){
-                    Attribute attribute = new Attribute(entry.getKey().getName(), entry.getKey().getDefault()).setShouldWatch(entry.getKey().b());
-                    AttributeModifier.Operation operation = entry.getValue().getOperation();
-                    com.quartzy.qapi.AttributeModifier.Operation operation1 = com.quartzy.qapi.AttributeModifier.Operation.ADDITION;
-                    switch(operation){
-                        case ADDITION:
-                            operation1 = com.quartzy.qapi.AttributeModifier.Operation.ADDITION;
-                            break;
-                        case MULTIPLY_BASE:
-                            operation1 = com.quartzy.qapi.AttributeModifier.Operation.MULTIPLY_BASE;
-                            break;
-                        case MULTIPLY_TOTAL:
-                            operation1 = com.quartzy.qapi.AttributeModifier.Operation.MULTIPLY_TOTAL;
-                            break;
-                    }
-                    com.quartzy.qapi.AttributeModifier attributeModifier = new com.quartzy.qapi.AttributeModifier(entry.getValue().getUniqueId(), entry.getValue().getName(), entry.getValue().getAmount(), operation1);
-                    effect.getAttributeModifierMap().put(attribute, attributeModifier);
-                }
-                return effect;*/
             case NBT_COMPOUND_TAG:
                 return ((NBTProviderImpl) QAPI.nbtProvider()).fromNMS(((NBTTagCompound) result));
             case NBT_TAG:
                 return ((NBTProviderImpl) QAPI.nbtProvider()).fromNMS(((NBTBase) result));
             case NBT_PATH:
-                return result.toString();
+                return new NBTPath(result.toString());
             case OBJECTIVE_CRITERIA:
                 IScoreboardCriteria scoreboardCriteria = (IScoreboardCriteria) result;
                 return ScoreCriteria.INSTANCES.get(scoreboardCriteria.getName());
@@ -307,7 +263,7 @@ public class CommandExecutorInfo_v1_16_R3 implements CommandExecutorInfo{
     
     @Override
     public String getArgumentString(String argumentName){
-        return this.getArgumentRange(argumentName).get(this.getCommandString());
+        return this.getArgumentRange(argumentName).getTrim(this.getCommandString());
     }
     
     @Override

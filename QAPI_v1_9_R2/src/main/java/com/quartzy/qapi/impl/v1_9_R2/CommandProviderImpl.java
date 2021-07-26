@@ -12,6 +12,11 @@ public class CommandProviderImpl implements CommandProvider{
     }
     
     @Override
+    public void unregisterCommand(String commandName){
+    
+    }
+    
+    @Override
     public CommandSenderInfo createSenderInstance(){
         return null;
     }

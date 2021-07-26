@@ -11,13 +11,13 @@ import com.quartzy.qapi.NamespacedKey;
 import com.quartzy.qapi.command.ArgumentTypeEnum;
 import com.quartzy.qapi.command.CommandExecutorInfo;
 import com.quartzy.qapi.command.CommandSenderInfo;
+import com.quartzy.qapi.nbt.NBTPath;
 import lombok.SneakyThrows;
 import net.minecraft.server.v1_15_R1.*;
 import net.minecraft.server.v1_15_R1.Vec2F;
 import net.minecraft.server.v1_15_R1.Vec3D;
 import org.bukkit.*;
 import org.bukkit.Particle;
-import org.bukkit.block.*;
 import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_15_R1.block.data.CraftBlockData;
@@ -120,7 +120,7 @@ public class CommandExecutorInfo_v1_15_R1 implements CommandExecutorInfo{
                 return new Location(commandContext.getSource().getWorld().getWorld(), c.x, c.y, c.z, d.i, d.j);
             case BLOCK_STATE:
                 ArgumentTileLocation argumentTileLocation = (ArgumentTileLocation) result;
-                return CraftBlockData.fromData(argumentTileLocation.a());
+                return CraftBlockData.fromData(argumentTileLocation.a()).getMaterial();
             case BLOCK_PREDICATE:
                 ArgumentBlockPredicate.b argumentBlockPredicate = (ArgumentBlockPredicate.b) result;
                 Predicate<ShapeDetectorBlock> shapeDetectorBlockPredicate = argumentBlockPredicate.create(commandContext.getSource().getServer().getTagRegistry());
@@ -164,16 +164,15 @@ public class CommandExecutorInfo_v1_15_R1 implements CommandExecutorInfo{
                 return functions;
             case GAME_PROFILE:
                 Collection<GameProfile> gameProfileL = ((ArgumentProfile.a) result).getNames(commandContext.getSource());
-                com.quartzy.qapi.GameProfile[] gameprofiles = new com.quartzy.qapi.GameProfile[gameProfileL.size()];
-                int i2 = 0;
-                for(GameProfile gameProfile : gameProfileL){
-                    com.quartzy.qapi.GameProfile gameprofile = new com.quartzy.qapi.GameProfile(gameProfile.getId(), gameProfile.getName());
-                    for(Map.Entry<String, Property> entry : gameProfile.getProperties().entries()){
-                        gameprofile.getProperties().put(entry.getKey(), new com.quartzy.qapi.GameProfile.Property(entry.getValue().getName(), entry.getValue().getValue(), entry.getValue().getSignature()));
+                com.quartzy.qapi.GameProfile[] profiles1 = new com.quartzy.qapi.GameProfile[gameProfileL.size()];
+                int i6 = 0;
+                for(GameProfile profile : gameProfileL){
+                    profiles1[i6] = new com.quartzy.qapi.GameProfile(profile.getId(), profile.getName());
+                    for(Map.Entry<String, Property> entry : profile.getProperties().entries()){
+                        profiles1[i6++].getProperties().put(entry.getKey(), new com.quartzy.qapi.GameProfile.Property(entry.getValue().getName(), entry.getValue().getValue(), entry.getValue().getSignature()));
                     }
-                    gameprofiles[i2++] = gameprofile;
                 }
-                return gameprofiles;
+                return profiles1;
             case ITEM_ENCHANTMENT:
                 return new CraftEnchantment((Enchantment) result);
             case MESSAGE:
@@ -188,7 +187,7 @@ public class CommandExecutorInfo_v1_15_R1 implements CommandExecutorInfo{
             case NBT_TAG:
                 return ((NBTProviderImpl) QAPI.nbtProvider()).fromNMS(((NBTBase) result));
             case NBT_PATH:
-                return result.toString();
+                return new NBTPath(result.toString());
             case OBJECTIVE_CRITERIA:
                 IScoreboardCriteria scoreboardCriteria = (IScoreboardCriteria) result;
                 return ScoreCriteria.INSTANCES.get(scoreboardCriteria.getName());
@@ -256,7 +255,7 @@ public class CommandExecutorInfo_v1_15_R1 implements CommandExecutorInfo{
     
     @Override
     public String getArgumentString(String argumentName){
-        return this.getArgumentRange(argumentName).get(this.getCommandString());
+        return this.getArgumentRange(argumentName).getTrim(this.getCommandString());
     }
     
     @Override

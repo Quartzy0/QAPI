@@ -1,11 +1,10 @@
 package com.quartzy.qapi.command;
 
 import com.quartzy.qapi.QAPI;
-import com.quartzy.qapi.StringRange;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
-import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -16,26 +15,38 @@ import java.util.HashMap;
 import java.util.List;
 
 public class CommandHandler{
+    public static final String ARGUMENT_SEPARATOR = " ";
+    
+    public static final char ARGUMENT_SEPARATOR_CHAR = ' ';
+    
+    private static final String USAGE_OPTIONAL_OPEN = "[";
+    private static final String USAGE_OPTIONAL_CLOSE = "]";
+    private static final String USAGE_REQUIRED_OPEN = "(";
+    private static final String USAGE_REQUIRED_CLOSE = ")";
+    private static final String USAGE_OR = "|";
+    
     
     private static HashMap<String, Command> commands = new HashMap<>();
     
-    public static void addCommand(Class<? extends Command> commandClass){
-        Command commandInstance = null;
+    public static <T extends Command> T addCommand(Class<T> commandClass){
+        if(!commandClass.isAnnotationPresent(CommandExecutor.class))return null;
+        CommandExecutor commandExecutorA = commandClass.getAnnotation(CommandExecutor.class);
+        T commandInstance = null;
         try{
-            Constructor<? extends Command> constructor = commandClass.getConstructor();
+            Constructor<T> constructor = commandClass.getConstructor();
             commandInstance = constructor.newInstance();
         } catch(NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e){
             e.printStackTrace();
         }
-        if(commandInstance==null) return;
+        if(commandInstance==null) return null;
         
-        LiteralNode masterNode = new LiteralNode(commandInstance.getName());
+        LiteralNode masterNode = new LiteralNode(commandExecutorA.value());
         Method[] declaredMethods = commandClass.getDeclaredMethods();
         methodLoop:
         for(int i = 0; i < declaredMethods.length; i++){
             if(declaredMethods[i].isAnnotationPresent(ArgumentExecutor.class)){
                 ArgumentExecutor annotation = declaredMethods[i].getAnnotation(ArgumentExecutor.class);
-                String path = annotation.path();
+                String path = annotation.value();
                 String[] pathNames = path.split("\\.");
                 Node currentNode = masterNode;
                 Parameter[] parameters = declaredMethods[i].getParameters();
@@ -85,6 +96,10 @@ public class CommandHandler{
                             case DOUBLE:
                                 ((ArgumentNode) newNode).setMaxD(parameterByName.maxD());
                                 ((ArgumentNode) newNode).setMinD(parameterByName.minD());
+                                break;
+                            case ANGLE:
+                                ((ArgumentNode) newNode).setMaxF(180);
+                                ((ArgumentNode) newNode).setMinF(-180);
                                 break;
                         }
                         if(!parameterByName.defaultB().equals(BoolUnset.UNSET) || parameterByName.defaultD()!=Double.MIN_VALUE || parameterByName.defaultF()!=Float.MIN_VALUE || parameterByName.defaultI()!=Integer.MIN_VALUE || parameterByName.defaultL()!=Long.MIN_VALUE){
@@ -169,28 +184,32 @@ public class CommandHandler{
             }
         }
         QAPI.commandProvider().registerCommand(masterNode);
+        return commandInstance;
+    }
+    
+    public static Command removeCommand(String command){
+        QAPI.commandProvider().unregisterCommand(command);
+        return commands.remove(command);
     }
     
     private static int executeFunction(CommandExecutorInfo info, Method method, Command instance, Object... args){
         try{
             method.invoke(instance, args);
-        }  catch(InvocationTargetException e){
+        }catch(IllegalArgumentException e){
+            Class<?>[] parameterTypes = method.getParameterTypes();
+            for(int i = 0; i < parameterTypes.length; i++){
+                System.out.println(parameterTypes[i].getName());
+            }
+            System.out.println(" ");
+            System.out.println(" ");
+            for(int i = 0; i < args.length; i++){
+                System.out.println(args[i]==null ? "null" : args[i].getClass().getName());
+            }
+        } catch(InvocationTargetException e){
             Throwable targetException = e.getTargetException();
             if(targetException instanceof CommandException){
                 CommandException exception = (CommandException) targetException;
-                String message = exception.getMessage();
-                String argument = exception.getArgument();
-                StringRange argumentRange;
-                if(argument==null || (argumentRange = info.getArgumentRange(argument))==null){
-                    info.sender().getSender().sendMessage(message);
-                    return 1;
-                }
-                String commandString = info.getCommandString();
-                commandString = commandString.substring(0, argumentRange.getStart()) + ChatColor.UNDERLINE + commandString.substring(argumentRange.getStart(), argumentRange.getEnd()) + ChatColor.RESET;
-                if(commandString.length()>CommandException.ERROR_COMMAND_OUT_LENGTH){
-                    commandString = "..." + commandString.substring(commandString.length()-CommandException.ERROR_COMMAND_OUT_LENGTH+3);
-                }
-                info.sender().getSender().sendMessage(ChatColor.RED + message + "\n" + ChatColor.GRAY + commandString + ChatColor.RED + "<--[HERE]");
+                exception.send(info);
             } else {
                 e.printStackTrace();
             }

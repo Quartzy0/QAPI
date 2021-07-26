@@ -9,4 +9,8 @@ public enum Version{
     Version(String name){
         this.name = name;
     }
+    
+    public boolean higher(Version version){
+        return this.ordinal()>version.ordinal();
+    }
 }

@@ -5,7 +5,6 @@ import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.quartzy.qapi.command.*;
-import com.quartzy.qapi.util.Timer;
 import net.minecraft.server.v1_16_R3.*;
 import net.minecraft.server.v1_16_R3.ArgumentBlockPredicate;
 import net.minecraft.server.v1_16_R3.ArgumentItemPredicate;
@@ -26,6 +25,14 @@ public class CommandProviderImpl implements CommandProvider{
         CommandDispatcher commandDispatcher = server.getCommandDispatcher();
         com.mojang.brigadier.CommandDispatcher<CommandListenerWrapper> a = commandDispatcher.a();
         a.register((LiteralArgumentBuilder<CommandListenerWrapper>) addBranch(null, node));
+    }
+    
+    @Override
+    public void unregisterCommand(String commandName){
+        DedicatedServer server = ((CraftServer) Bukkit.getServer()).getServer();
+        CommandDispatcher commandDispatcher = server.getCommandDispatcher();
+        com.mojang.brigadier.CommandDispatcher<CommandListenerWrapper> a = commandDispatcher.a();
+        a.getRoot().removeCommand(commandName);
     }
     
     @Override
@@ -138,12 +145,9 @@ public class CommandProviderImpl implements CommandProvider{
         }
         if(nodeArg.getExecutor()!=null){
             argumentBuilder.executes(commandContext -> {
-                Timer.start();
                 CommandExecutorInfo_v1_16_R3 t = new CommandExecutorInfo_v1_16_R3();
                 t.setCommandContext(commandContext);
-                int run = nodeArg.getExecutor().run(t);
-                Timer.end();
-                return run;
+                return nodeArg.getExecutor().run(t);
             });
         }
         for(int i = 0; i < nodeArg.getChildren().size(); i++){

@@ -3,8 +3,8 @@ package com.quartzy.qapi;
 import java.util.Objects;
 
 public class StringRange {
-    private final int start;
-    private final int end;
+    private int start;
+    private int end;
     
     public StringRange(int start, int end) {
         this.start = start;
@@ -23,12 +23,28 @@ public class StringRange {
         return new StringRange(Math.min(a.getStart(), b.getStart()), Math.max(a.getEnd(), b.getEnd()));
     }
     
+    public StringRange add(int i){
+        return between(this.start+i, this.end+i);
+    }
+    
     public int getStart() {
         return this.start;
     }
     
     public int getEnd() {
         return this.end;
+    }
+    
+    public void setStart(int start){
+        this.start = start;
+    }
+    
+    public void setEnd(int end){
+        this.end = end;
+    }
+    
+    public String getTrim(String string) {
+        return string.substring(this.start, this.end).trim();
     }
     
     public String get(String string) {

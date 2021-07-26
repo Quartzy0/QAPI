@@ -15,6 +15,7 @@ import org.bukkit.craftbukkit.v1_13_R1.util.CraftMagicNumbers;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -199,7 +200,7 @@ public class NBTProviderImpl implements NBTProvider{
                 return new NBTListLong(((NBTTagLongArray) base).d());
             case CraftMagicNumbers.NBT.TAG_LIST:
                 NBTTagList nbtList = (NBTTagList) base;
-                NBTListTag nbtListTag = new NBTListTag(Collections.emptyList(), (byte) nbtList.d());
+                NBTListTag nbtListTag = new NBTListTag(new ArrayList<>(), (byte) nbtList.d());
                 for(net.minecraft.server.v1_13_R1.NBTBase nbtBase : nbtList){
                     nbtListTag.add(fromNMS(nbtBase));
                 }

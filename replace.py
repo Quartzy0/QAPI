@@ -5,8 +5,11 @@
 
 import sys
 
-with open(sys.argv[1], "rt") as fin:
-    with open(sys.argv[1].replace(sys.argv[2], sys.argv[3]), "wt") as fout:
-        for line in fin:
-            fout.write(line.replace(sys.argv[2], sys.argv[3]))
+def replace(input, search, replace):
+    with open(input, "rt") as fin:
+        with open(input.replace(search, replace), "wt") as fout:
+            for line in fin:
+                fout.write(line.replace(search, replace))
 
+
+replace(sys.argv[1], sys.argv[2], sys.argv[3])

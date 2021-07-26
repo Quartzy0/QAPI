@@ -2,3 +2,8 @@ name: QAPI
 main: com.quartzy.qapi.QAPIPlugin
 version: 1.0-SNAPSHOT
 api-version: 1.13
+commands:
+  perform_tests:
+    description: Performs tests on most command parameters to make sure they all behave as expected.
+    permission: qapi.commands.perform_tests
+    usage: /perform_tests

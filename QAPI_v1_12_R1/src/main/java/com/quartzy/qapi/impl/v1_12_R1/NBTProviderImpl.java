@@ -18,6 +18,7 @@ import org.bukkit.inventory.ItemStack;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -206,7 +207,7 @@ public class NBTProviderImpl implements NBTProvider{
                 return new NBTListLong(getLongArray((NBTTagLongArray) base));
             case CraftMagicNumbers.NBT.TAG_LIST:
                 NBTTagList nbtList = (NBTTagList) base;
-                NBTListTag nbtListTag = new NBTListTag(Collections.emptyList(), (byte) nbtList.g());
+                NBTListTag nbtListTag = new NBTListTag(new ArrayList<>(), (byte) nbtList.g());
                 for(int i = 0; i < nbtList.size(); i++){
                     nbtListTag.add(fromNMS(nbtList.i(i)));
                 }

@@ -2,10 +2,10 @@ package com.quartzy.qapi.command;
 
 public class ArgumentNode extends Node<ArgumentNode>{
     private ArgumentTypeEnum type;
-    private long minL, maxL;
-    private int minI, maxI;
-    private float minF, maxF;
-    private double minD, maxD;
+    private long minL = Long.MIN_VALUE, maxL = Long.MAX_VALUE;
+    private int minI = Integer.MIN_VALUE, maxI = Integer.MAX_VALUE;
+    private float minF = -Float.MAX_VALUE, maxF = Float.MAX_VALUE;
+    private double minD = -Double.MAX_VALUE, maxD = Double.MAX_VALUE;
     
     public ArgumentNode(String name, ArgumentTypeEnum type){
         super(name);

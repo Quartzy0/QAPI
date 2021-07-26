@@ -196,7 +196,7 @@ public class NBTCompound implements NBTBase{
         } catch(ClassCastException e){
             //Ignore
         }
-        return new NBTListTag(Collections.emptyList(), type);
+        return new NBTListTag(new ArrayList<>(), type);
     }
     
     public NBTListTag getTagArray(String name, Class<? extends NBTBase> type){
@@ -219,12 +219,35 @@ public class NBTCompound implements NBTBase{
         return type.isAssignableFrom(nbtBase.getClass());
     }
     
+    Map<String, NBTBase> getTags(){
+        return tags;
+    }
+    
     @Override
     public boolean equals(Object o){
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         NBTCompound that = (NBTCompound) o;
         return Objects.equals(tags, that.tags);
+    }
+    
+    @Override
+    public String toString(){
+        StringBuilder builder = new StringBuilder();
+        builder.append("NBTCompound{");
+        boolean first = true;
+        for(Map.Entry<String, NBTBase> entry : this.tags.entrySet()){
+            if(!first){
+                builder.append(", ");
+            }else{
+                first = false;
+            }
+            builder.append(entry.getKey());
+            builder.append(": ");
+            builder.append(entry.getValue().toString());
+        }
+        builder.append('}');
+        return builder.toString();
     }
     
     @Override

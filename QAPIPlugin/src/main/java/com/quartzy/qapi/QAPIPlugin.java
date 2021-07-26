@@ -2,7 +2,6 @@ package com.quartzy.qapi;
 
 import com.quartzy.qapi.command.CommandHandler;
 import com.quartzy.qapi.nbt.NBTCompound;
-import com.quartzy.qapi.util.Timer;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -27,10 +26,11 @@ public class QAPIPlugin extends JavaPlugin implements Listener{
         QAPIProvider qapiProvider = QAPI.qapi();
         qapiProvider.sayHi();
         getServer().getPluginManager().registerEvents(this, this);
+        
+        getCommand("perform_tests").setExecutor(new PerformTests());
     
-        Timer.start();
         CommandHandler.addCommand(TestCommand.class);
-        Timer.end();
+        CommandHandler.addCommand(SimpleCommand.class);
     }
     
     @EventHandler

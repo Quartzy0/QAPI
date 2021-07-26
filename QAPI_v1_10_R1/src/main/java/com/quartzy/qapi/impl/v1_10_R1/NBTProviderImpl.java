@@ -1,13 +1,13 @@
 package com.quartzy.qapi.impl.v1_10_R1;
 
-import com.quartzy.qapi.nbt.*;
 import com.quartzy.qapi.nbt.NBTBase;
+import com.quartzy.qapi.nbt.*;
 import com.quartzy.qapi.nbt.list.NBTListByte;
 import com.quartzy.qapi.nbt.list.NBTListInt;
 import com.quartzy.qapi.nbt.list.NBTListLong;
 import com.quartzy.qapi.nbt.list.NBTListTag;
-import com.quartzy.qapi.nbt.numbers.*;
 import com.quartzy.qapi.nbt.numbers.NBTNumber;
+import com.quartzy.qapi.nbt.numbers.*;
 import net.minecraft.server.v1_10_R1.*;
 import org.bukkit.craftbukkit.v1_10_R1.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftItemStack;
@@ -17,7 +17,7 @@ import org.bukkit.inventory.ItemStack;
 import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.UUID;
 
 public class NBTProviderImpl implements NBTProvider{
@@ -223,7 +223,7 @@ public class NBTProviderImpl implements NBTProvider{
                 return new NBTListLong(values);
             case 9:
                 NBTTagList nbtList = (NBTTagList) base;
-                NBTListTag nbtListTag = new NBTListTag(Collections.emptyList(), (byte) nbtList.g());
+                NBTListTag nbtListTag = new NBTListTag(new ArrayList<>(), (byte) nbtList.g());
                 for(int i = 0; i < nbtList.size(); i++){
                     nbtListTag.add(fromNMS(nbtList.h(i)));
                 }

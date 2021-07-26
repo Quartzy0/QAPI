@@ -11,13 +11,10 @@ import org.bukkit.inventory.ItemStack;
 import java.util.Arrays;
 import java.util.function.Predicate;
 
+@CommandExecutor("test-command")
 public class TestCommand extends Command{
-    @Override
-    public String getName(){
-        return "test-command";
-    }
     
-    @ArgumentExecutor(path = "target.item.amount.silent")
+    @ArgumentExecutor(value = "target.item.amount.silent")
     public void giveItem(@Argument(name = "target", type = ArgumentTypeEnum.PLAYER) Player target,
                          @Argument(name = "item", type = ArgumentTypeEnum.ITEM_STACK) ItemStack item,
                          @Argument(name = "amount", type = ArgumentTypeEnum.INTEGER, defaultI = 23) int amount,
@@ -29,7 +26,7 @@ public class TestCommand extends Command{
         throw new CommandException("item", "Epic command exception! Test argument: %d", 55);
     }
     
-    @ArgumentExecutor(path = "target.location")
+    @ArgumentExecutor("target.location")
     public void teleport(@Argument(name = "target", type = ArgumentTypeEnum.PLAYER) Player target,
                          @Argument(name = "location", type = ArgumentTypeEnum.BLOCK_POS) Location location){
         target.teleport(location);
@@ -41,7 +38,7 @@ public class TestCommand extends Command{
 //        Bukkit.broadcastMessage(message + " (This message was brought to you by our sponsor, " + sender.getName() + ")");
 //    }
     
-    @ArgumentExecutor(path = "manytest.block.item.blockp.itemp.profile.bpos.cpos.vec3.vec2.color.resloc.angle.rot")
+    @ArgumentExecutor(value = "manytest.block.item.blockp.itemp.profile.bpos.cpos.vec3.vec2.color.resloc.angle.rot")
     public void multiArgumentTest(@Argument(name = "block", type = ArgumentTypeEnum.BLOCK_STATE)Material blockData,
                                   @Argument(name = "item", type = ArgumentTypeEnum.ITEM_STACK) Material material,
                                   @Argument(name = "blockp", type = ArgumentTypeEnum.BLOCK_PREDICATE)Predicate<BlockState> state,
