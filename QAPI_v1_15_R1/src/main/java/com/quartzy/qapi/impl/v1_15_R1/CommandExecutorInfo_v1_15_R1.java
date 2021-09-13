@@ -8,7 +8,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.quartzy.qapi.*;
 import com.quartzy.qapi.Axis;
 import com.quartzy.qapi.NamespacedKey;
-import com.quartzy.qapi.command.ArgumentTypeEnum;
+import com.quartzy.qapi.command.ArgumentType;
 import com.quartzy.qapi.command.CommandExecutorInfo;
 import com.quartzy.qapi.command.CommandSenderInfo;
 import com.quartzy.qapi.nbt.NBTPath;
@@ -36,6 +36,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Predicate;
 
+@SuppressWarnings("ALL")
 public class CommandExecutorInfo_v1_15_R1 implements CommandExecutorInfo{
     private CommandSenderInfo_v1_15_R1 senderInfo;
     private CommandContext<CommandListenerWrapper> commandContext;
@@ -55,7 +56,7 @@ public class CommandExecutorInfo_v1_15_R1 implements CommandExecutorInfo{
     
     @SneakyThrows
     @Override
-    public Object getArgument(String argumentName, ArgumentTypeEnum type){
+    public Object getArgument(String argumentName, ArgumentType type){
         if(argumentsField==null){
             try{
                 argumentsField = CommandContext.class.getDeclaredField("arguments");
@@ -104,7 +105,7 @@ public class CommandExecutorInfo_v1_15_R1 implements CommandExecutorInfo{
                 return entityPlayer.getBukkitEntity();
             case ITEM_STACK:
                 ArgumentPredicateItemStack itemStack = (ArgumentPredicateItemStack) result;
-                return CraftItemStack.asNewCraftStack(itemStack.a());
+                return CraftItemStack.asNewCraftStack(itemStack.a()).getType();
             case ITEM_PREDICATE:
                 ArgumentItemPredicate.b itemPredicate = (ArgumentItemPredicate.b) result;
                 Predicate<net.minecraft.server.v1_15_R1.ItemStack> itemStackPredicate = itemPredicate.create(commandContext);

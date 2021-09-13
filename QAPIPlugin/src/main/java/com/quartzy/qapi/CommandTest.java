@@ -6,16 +6,14 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 public abstract class CommandTest extends Command{
-    public abstract String[] testCases();
-    public abstract int testCount();
     private int testsFinished = 0;
     
     protected final void finishedTest(){
         testsFinished++;
     }
     
-    public final boolean allTestsFinish(){
-        return testsFinished==testCount();
+    public int getTestsFinished(){
+        return testsFinished;
     }
     
     protected final <T> void assertEquals(Predicate<T> a, T b, String message){
@@ -25,7 +23,7 @@ public abstract class CommandTest extends Command{
     
     protected final <T> void assertEquals(Predicate<T> a, T b){
         if(a!=null && a.test(b))return;
-        throw new AssertionError("Assertion failed. Predicate did not test positively with object " + String.valueOf(b));
+        throw new AssertionError("Assertion failed. Predicate did not test positively with object " + b);
     }
     
     protected final void assertEquals(Object a, Object b, String message){
@@ -35,7 +33,7 @@ public abstract class CommandTest extends Command{
     
     protected final void assertEquals(Object a, Object b){
         if(Objects.deepEquals(a, b))return;
-        throw new AssertionError("Assertion failed. Objects " + String.valueOf(a) + " and " + String.valueOf(b) + " are not equal");
+        throw new AssertionError("Assertion failed. Objects " + a + " and " + b + " are not equal");
     }
     
     protected final void assertRange(int i, int min, int max){

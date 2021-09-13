@@ -9,7 +9,6 @@ import com.quartzy.qapi.nbt.list.NBTListTag;
 import com.quartzy.qapi.nbt.numbers.*;
 import com.quartzy.qapi.nbt.numbers.NBTNumber;
 import net.minecraft.server.v1_16_R3.*;
-import org.bukkit.craftbukkit.v1_16_R3.block.CraftBlockState;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_16_R3.util.CraftMagicNumbers;
@@ -17,7 +16,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.UUID;
 
 public class NBTProviderImpl implements NBTProvider{

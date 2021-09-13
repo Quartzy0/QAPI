@@ -1,5 +1,0 @@
-package com.quartzy.qapi.command;
-
-public enum ArgumentVariant{
-    STRING_WORD, STRING_STRING, STRING_GREEDY, ENTITY_PLAYER, ENTITY_PLAYERS, ENTITY_ENTITY, ENTITY_ENTITIES, NUMBER_RANGE, NONE
-}

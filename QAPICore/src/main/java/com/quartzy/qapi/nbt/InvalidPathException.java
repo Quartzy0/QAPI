@@ -6,8 +6,8 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.command.CommandSender;
 
 public class InvalidPathException extends Exception{
-    private StringRange range;
-    private String fullPath;
+    private final StringRange range;
+    private final String fullPath;
     
     public InvalidPathException(String message, StringRange range, String fullPath){
         super(message);

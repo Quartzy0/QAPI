@@ -16,8 +16,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.UUID;
 
 public class NBTProviderImpl implements NBTProvider{

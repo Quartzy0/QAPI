@@ -5,7 +5,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.quartzy.qapi.*;
 import com.quartzy.qapi.command.ArgumentNode;
-import com.quartzy.qapi.command.ArgumentTypeEnum;
+import com.quartzy.qapi.command.ArgumentType;
 import com.quartzy.qapi.command.LiteralNode;
 import com.quartzy.qapi.command.Node;
 import com.quartzy.qapi.nbt.NBTPath;
@@ -22,13 +22,12 @@ import org.bukkit.craftbukkit.v1_8_R1.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_8_R1.potion.CraftPotionEffectType;
 import org.bukkit.craftbukkit.v1_8_R1.util.CraftChatMessage;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.StringUtil;
 
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.function.Predicate;
 
+@SuppressWarnings("ALL")
 public class CommandController extends org.bukkit.command.Command{
     private static Method mojangsonParse;
     private static Method mojangsonTypeParse;
@@ -48,7 +47,6 @@ public class CommandController extends org.bukkit.command.Command{
     
     private final LiteralNode commandNode;
     private Node<?> finalNode;
-    private String lastCompleteArg;
     private Node<?> lastNode;
     private int lastOffset;
     private List<String> suggestions = new ArrayList<>();
@@ -79,7 +77,12 @@ public class CommandController extends org.bukkit.command.Command{
         executorInfo.setArguments(arguments);
         
         if(finalNode==null || finalNode.getExecutor()==null){
-            new com.quartzy.qapi.command.CommandException(fullString.length(), "Expected argument").send(executorInfo);
+            new com.quartzy.qapi.command.CommandException(s.length() + 2 + lastOffset - 1, "Invalid argument").send(executorInfo);
+            return true;
+        }
+    
+        if(!finalNode.getRequirement().test(executorInfo.getSender())){
+            new com.quartzy.qapi.command.CommandException(-1, "You do not have permission to run this command").send(executorInfo);
             return true;
         }
     
@@ -93,10 +96,10 @@ public class CommandController extends org.bukkit.command.Command{
         if(args.length()<=offset)return;
         ICommandListener listener = executorInfo.getSender().getListener();
         for(int j = 0; j < node.getChildren().size() ; j++){
-            finalNode = (Node<?>) node.getChildren().get(j);
+            finalNode = node.getChildren().get(j);
             if(finalNode instanceof ArgumentNode){
                 ArgumentNode argumentNode = (ArgumentNode) finalNode;
-                ArgumentTypeEnum type = argumentNode.getType();
+                ArgumentType type = argumentNode.getType();
                 StringRange range = new StringRange(offset, -1);
                 ParsedArgument argument = new ParsedArgument(null, range, argumentNode.getName());
                 try{
@@ -173,8 +176,9 @@ public class CommandController extends org.bukkit.command.Command{
                         case BLOCK_POS:
                         case VEC3:
                             range.setEnd(indexOf(args, offset, 3));
-                            BlockPosition a = CommandAbstract.a(listener, split(range.getTrim(args), 3), 0, false);
-                            argument.value = new Location(executorInfo.getSender().getWorld(), a.getX(), a.getY(), a.getZ());
+                            String[] splitPos = split(range.getTrim(args), 3);
+                            BlockPosition senderPos = listener.getChunkCoordinates();
+                            argument.value = new Location(executorInfo.getSender().getWorld(), CommandAbstract.b(senderPos.getX(), splitPos[0], -30000000, 30000000, false), CommandAbstract.b(senderPos.getX(), splitPos[1], -30000000, 30000000, false), CommandAbstract.b(senderPos.getZ(), splitPos[2], -30000000, 30000000, false));
                             parse(argumentNode, args, range.getEnd()+1, executorInfo, rethrow);
                             break;
                         case VEC2:
@@ -207,7 +211,7 @@ public class CommandController extends org.bukkit.command.Command{
                             argument.value = range.getTrim(args);
                             parse(argumentNode, args, range.getEnd()+1, executorInfo, rethrow);
                             break;
-                        case STRING_STRING:
+                        case STRING:
                             range.setEnd(args.indexOf('"', offset));
                             argument.value = range.getTrim(args);
                             parse(argumentNode, args, range.getEnd()+1, executorInfo, rethrow);
@@ -216,18 +220,6 @@ public class CommandController extends org.bukkit.command.Command{
                             range.setEnd(indexOf(args, offset, 1));
                             Item item = CommandAbstract.f(listener, range.getTrim(args));
                             argument.value = CraftItemStack.asNewCraftStack(item, 1).getType();
-                            parse(argumentNode, args, range.getEnd()+1, executorInfo, rethrow);
-                            break;
-                        case ITEM_PREDICATE:
-                            range.setEnd(indexOf(args, offset, 1));
-                            Item item1 = CommandAbstract.f(listener, range.getTrim(args));
-                            ItemStack itemStackP = CraftItemStack.asNewCraftStack(item1, 1);
-                            argument.value = new Predicate<ItemStack>() {
-                                @Override
-                                public boolean test(ItemStack itemStack){
-                                    return itemStack.equals(itemStackP);
-                                }
-                            };
                             parse(argumentNode, args, range.getEnd()+1, executorInfo, rethrow);
                             break;
                         case UUID:
@@ -330,18 +322,6 @@ public class CommandController extends org.bukkit.command.Command{
                             argument.value = Material.getMaterial(Block.getId(g));
                             parse(argumentNode, args, range.getEnd()+1, executorInfo, rethrow);
                             break;
-                        case BLOCK_PREDICATE:
-                            range.setEnd(indexOf(args, offset, 1));
-                            Block block = CommandAbstract.g(listener, range.getTrim(args));
-                            Material material = Material.getMaterial(Block.getId(block));
-                            argument.value = new Predicate<org.bukkit.block.BlockState>() {
-                                @Override
-                                public boolean test(org.bukkit.block.BlockState blockState){
-                                    return blockState.getType().equals(material);
-                                }
-                            };
-                            parse(argumentNode, args, range.getEnd()+1, executorInfo, rethrow);
-                            break;
                         case ITEM_ENCHANTMENT:
                             range.setEnd(indexOf(args, offset, 1));
                             Enchantment ench;
@@ -350,7 +330,7 @@ public class CommandController extends org.bukkit.command.Command{
                             } catch (Exception e) {
                                 ench = Enchantment.getByName(range.getTrim(args));
                                 if (ench == null) {
-                                    throw e;
+                                    throw new com.quartzy.qapi.command.CommandException(argument.name, "Unrecognized enchantment '" + range.getTrim(args) + "'");
                                 }
                             }
                             argument.value = new CraftEnchantment(ench);
@@ -569,9 +549,6 @@ public class CommandController extends org.bukkit.command.Command{
     
     @Override
     public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException{
-//        if(lastCompleteArg!=null && lastCompleteArg.equals(args[args.length-2])){
-//            return sort(args[args.length-1]);
-//        }
         System.out.println(alias + "  " + Arrays.toString(args));
         StringBuilder argsStr = new StringBuilder();
         for(int i = 0; i < args.length-1; i++){
@@ -595,11 +572,10 @@ public class CommandController extends org.bukkit.command.Command{
             }
         }
         this.suggestions = suggestions;
-        lastCompleteArg = args.length<=1 ? null : args[args.length-2];
         return sort(args[args.length-1]);
     }
     
-    public List<String> generateSuggestions(ArgumentTypeEnum type, int argumentCount, CommandSender sender){
+    public List<String> generateSuggestions(ArgumentType type, int argumentCount, CommandSender sender){
         switch(type){
             default:
                 return new ArrayList<>();
@@ -649,10 +625,8 @@ public class CommandController extends org.bukkit.command.Command{
             case TEAM:
                 return new ArrayList<String>(MinecraftServer.getServer().getWorldServer(0).getScoreboard().getTeamNames());
             case BLOCK_STATE:
-            case BLOCK_PREDICATE:
                 return toStringList(Block.REGISTRY.keySet());
             case ITEM_STACK:
-            case ITEM_PREDICATE:
                 return toStringList(Item.REGISTRY.keySet());
             case VEC3:
                 if(!(sender instanceof org.bukkit.entity.Entity))return new ArrayList<>();
@@ -878,6 +852,9 @@ public class CommandController extends org.bukkit.command.Command{
         return -1;
     }
     
+    public LiteralNode getCommandNode(){
+        return commandNode;
+    }
     
     @Override
     public String toString(){

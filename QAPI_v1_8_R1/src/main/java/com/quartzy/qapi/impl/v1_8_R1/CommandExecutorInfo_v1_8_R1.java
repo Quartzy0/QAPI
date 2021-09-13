@@ -6,10 +6,10 @@ import com.quartzy.qapi.command.*;
 import java.util.HashMap;
 
 public class CommandExecutorInfo_v1_8_R1 implements CommandExecutorInfo{
-    private CommandSenderInfo_v1_8_R1 sender;
+    private final CommandSenderInfo_v1_8_R1 sender;
     private HashMap<String, CommandController.ParsedArgument> arguments;
-    private String fullString;
-    private String argString;
+    private final String fullString;
+    private final String argString;
     
     public CommandExecutorInfo_v1_8_R1(CommandSenderInfo_v1_8_R1 sender, HashMap<String, CommandController.ParsedArgument> arguments, String fullString, String argString){
         this.sender = sender;
@@ -28,7 +28,7 @@ public class CommandExecutorInfo_v1_8_R1 implements CommandExecutorInfo{
     }
     
     @Override
-    public Object getArgument(String argumentName, ArgumentTypeEnum type){
+    public Object getArgument(String argumentName, ArgumentType type){
         return arguments.get(argumentName).value;
     }
     

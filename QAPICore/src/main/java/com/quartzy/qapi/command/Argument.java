@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Argument{
     String name();
-    ArgumentTypeEnum type();
+    ArgumentType type();
     
     int defaultI() default Integer.MIN_VALUE;
     long defaultL() default Long.MIN_VALUE;

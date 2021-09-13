@@ -10,7 +10,6 @@
         <module name="QAPI.QAPI_v1_9_R1.main" />
         <module name="QAPI.QAPI_v1_8_R1.main" />
         <module name="QAPI.QAPI_v1_14_R1.main" />
-        <module name="QAPI.main" />
         <module name="QAPI.QAPI_v1_13_R1.main" />
         <module name="QAPI.QAPI_v1_12_R1.main" />
         <module name="QAPI.QAPI_v1_9_R2.main" />

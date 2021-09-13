@@ -7,7 +7,6 @@ import com.quartzy.qapi.nbt.list.NBTListInt;
 import com.quartzy.qapi.nbt.list.NBTListLong;
 import com.quartzy.qapi.nbt.list.NBTListTag;
 import com.quartzy.qapi.nbt.numbers.*;
-import com.quartzy.qapi.nbt.numbers.NBTNumber;
 import net.minecraft.server.v1_9_R2.*;
 import org.bukkit.craftbukkit.v1_9_R2.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_9_R2.inventory.CraftItemStack;
@@ -18,7 +17,6 @@ import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.UUID;
 
 public class NBTProviderImpl implements NBTProvider{
@@ -186,7 +184,7 @@ public class NBTProviderImpl implements NBTProvider{
         return createEndTag();
     }
     
-    private NBTBase fromNMS(net.minecraft.server.v1_9_R2.NBTBase base){
+    public NBTBase fromNMS(net.minecraft.server.v1_9_R2.NBTBase base){
         if(base==null)return null;
         switch(base.getTypeId()){
             case 1:

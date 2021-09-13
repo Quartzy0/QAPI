@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
+@SuppressWarnings("ALL")
 public enum Particle{
     EXPLOSION_NORMAL,
     EXPLOSION_LARGE,

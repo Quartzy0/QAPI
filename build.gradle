@@ -10,18 +10,23 @@ targetCompatibility = 8
 
 repositories {
     mavenCentral()
+    mavenLocal()
 
     maven { url = 'https://repo.dmulloy2.net/repository/public/' }
     maven { url = 'https://hub.spigotmc.org/nexus/content/groups/public' }
 }
 
-dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
-
-    compileOnly 'org.projectlombok:lombok:1.18.20'
-    annotationProcessor 'org.projectlombok:lombok:1.18.20'
+configurations {
+    extraLibs
 }
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
+
+    extraLibs group: 'com.github.cryptomorin', name: 'XSeries', version: '8.4.0'
+}
+
 
 test {
     useJUnitPlatform()
@@ -29,8 +34,8 @@ test {
 
 jar {
     if (project.hasProperty("jarOutput")){
-        File outputDir = new File(project.projectDir.absolutePath + "/" + project.property("jarOutput"));
-        destinationDirectory.set(outputDir);
+        File outputDir = new File(project.projectDir.absolutePath + "/" + project.property("jarOutput"))
+        destinationDirectory.set(outputDir)
     }
 }
 
@@ -38,11 +43,15 @@ subprojects.each { subproject -> evaluationDependsOn(subproject.path)}
 
 task allJar(type: Jar, dependsOn: subprojects.assemble) {
     if (project.hasProperty("jarOutput")){
-        File outputDir = new File(project.projectDir.absolutePath + "/" + project.property("jarOutput"));
+        File outputDir = new File(project.projectDir.absolutePath + "/" + project.property("jarOutput"))
         destinationDirectory.set(outputDir)
     }
 
-    baseName = 'QAPI'
+    archiveBaseName.convention("QAPI")
+    archiveBaseName.set("QAPI")
+
+    from { configurations.extraLibs.collect { it.isDirectory() ? it : zipTree(it) } }
+
     subprojects.each { subproject ->
         from subproject.configurations.archives.allArtifacts.files.collect {
             zipTree(it)

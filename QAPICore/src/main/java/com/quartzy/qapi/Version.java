@@ -13,4 +13,8 @@ public enum Version{
     public boolean higher(Version version){
         return this.ordinal()>version.ordinal();
     }
+    
+    public boolean lower(Version version){
+        return this.ordinal()<version.ordinal();
+    }
 }

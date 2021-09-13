@@ -31,6 +31,7 @@ public class QAPIPlugin extends JavaPlugin implements Listener{
     
         CommandHandler.addCommand(TestCommand.class);
         CommandHandler.addCommand(SimpleCommand.class);
+        CommandHandler.addCommand(SimpleCommand.SimpleCommandP2.class);
     }
     
     @EventHandler

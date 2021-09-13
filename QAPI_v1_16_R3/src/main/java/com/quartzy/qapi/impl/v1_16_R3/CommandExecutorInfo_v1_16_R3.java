@@ -8,13 +8,11 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.quartzy.qapi.*;
 import com.quartzy.qapi.Axis;
 import com.quartzy.qapi.NamespacedKey;
-import com.quartzy.qapi.command.ArgumentTypeEnum;
+import com.quartzy.qapi.command.ArgumentType;
 import com.quartzy.qapi.command.CommandExecutorInfo;
 import com.quartzy.qapi.command.CommandSenderInfo;
 import com.quartzy.qapi.nbt.NBTPath;
 import lombok.SneakyThrows;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.chat.BaseComponentSerializer;
 import net.minecraft.server.v1_16_R3.*;
 import net.minecraft.server.v1_16_R3.Vec2F;
 import net.minecraft.server.v1_16_R3.Vec3D;
@@ -39,6 +37,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Predicate;
 
+@SuppressWarnings({"unchecked", "unused"})
 public class CommandExecutorInfo_v1_16_R3 implements CommandExecutorInfo{
     private CommandSenderInfo_v1_16_R3 senderInfo;
     private CommandContext<CommandListenerWrapper> commandContext;
@@ -62,7 +61,7 @@ public class CommandExecutorInfo_v1_16_R3 implements CommandExecutorInfo{
     
     @SneakyThrows
     @Override
-    public Object getArgument(String argumentName, ArgumentTypeEnum type){
+    public Object getArgument(String argumentName, ArgumentType type){
         if(argumentsField==null){
             try{
                 argumentsField = CommandContext.class.getDeclaredField("arguments");
@@ -111,7 +110,7 @@ public class CommandExecutorInfo_v1_16_R3 implements CommandExecutorInfo{
                 return entityPlayer.getBukkitEntity();
             case ITEM_STACK:
                 ArgumentPredicateItemStack itemStack = (ArgumentPredicateItemStack) result;
-                return CraftItemStack.asNewCraftStack(itemStack.a());
+                return CraftItemStack.asNewCraftStack(itemStack.a()).getType();
             case ITEM_PREDICATE:
                 ArgumentItemPredicate.b itemPredicate = (ArgumentItemPredicate.b) result;
                 Predicate<net.minecraft.server.v1_16_R3.ItemStack> itemStackPredicate = itemPredicate.create(commandContext);

@@ -5,14 +5,13 @@ import com.quartzy.qapi.QAPIProvider;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.v1_13_R2.CraftEffect;
-import org.bukkit.craftbukkit.v1_13_R2.CraftParticle;
 import org.bukkit.entity.Player;
 
+@SuppressWarnings("ALL")
 public class QAPIProviderImpl implements QAPIProvider{
     @Override
     public void sayHi(){
-        System.out.println("Hi from 1.9!");
+        System.out.println("Hi from 1.13.2!");
     }
     
     @Override
@@ -20,17 +19,18 @@ public class QAPIProviderImpl implements QAPIProvider{
         if(sender instanceof Player){
             ((Player) sender).spigot().sendMessage(components);
         }else{
-            String finalString = "";
+            StringBuilder finalString = new StringBuilder();
             for(int i = 0; i < components.length; i++){
-                if(i==components.length-1) finalString+=components[i].toLegacyText();
-                else finalString+=components[i].toLegacyText() + "\n";
+                if(i==components.length-1) finalString.append(components[i].toLegacyText());
+                else finalString.append(components[i].toLegacyText()).append("\n");
             }
-            sender.sendMessage(finalString);
+            sender.sendMessage(finalString.toString());
         }
     }
     
     @Override
     public <T> void spawnParticle(Particle particle, Location location, int count, T data){
+        if(location.getWorld()==null)return;
         location.getWorld().spawnParticle(toBukkitParticle(particle, org.bukkit.Particle.class), location, count, data);
     }
     

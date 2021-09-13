@@ -12,4 +12,5 @@ def replace(input, search, replace):
                 fout.write(line.replace(search, replace))
 
 
-replace(sys.argv[1], sys.argv[2], sys.argv[3])
+for i in range(len(sys.argv)-3):
+    replace(sys.argv[i+3], sys.argv[1], sys.argv[2])

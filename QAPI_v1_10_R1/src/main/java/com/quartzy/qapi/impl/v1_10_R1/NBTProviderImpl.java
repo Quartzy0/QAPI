@@ -185,7 +185,7 @@ public class NBTProviderImpl implements NBTProvider{
         return createEndTag();
     }
     
-    private NBTBase fromNMS(net.minecraft.server.v1_10_R1.NBTBase base){
+    public NBTBase fromNMS(net.minecraft.server.v1_10_R1.NBTBase base){
         if(base==null)return null;
         switch(base.getTypeId()){
             case 1:

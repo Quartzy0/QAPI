@@ -10,7 +10,7 @@ public class NBTPath{
     public static final char ARRAY_BEGIN = '[';
     public static final char ARRAY_END = ']';
     
-    private String src;
+    private final String src;
     
     public NBTPath(String src){
         this.src = src;
@@ -64,8 +64,8 @@ public class NBTPath{
         return narrowed;
     }
     
-    public static Object traverseList(NBTList listIn, String path, String fullPath, int offset) throws InvalidPathException{
-        int i = -1;
+    public static Object traverseList(NBTList<?> listIn, String path, String fullPath, int offset) throws InvalidPathException{
+        int i;
         int endIndex = path.indexOf(ARRAY_END);
         StringRange range = new StringRange(offset + 1, endIndex + offset + 1);
         try{

@@ -1,38 +1,117 @@
 package com.quartzy.qapi.impl.v1_16_R2;
 
-import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.tree.CommandNode;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.quartzy.qapi.command.*;
+import com.quartzy.qapi.command.ArgumentType;
 import net.minecraft.server.v1_16_R2.*;
-import net.minecraft.server.v1_16_R2.ArgumentBlockPredicate;
-import net.minecraft.server.v1_16_R2.ArgumentItemPredicate;
-import net.minecraft.server.v1_16_R2.ArgumentItemStack;
-import net.minecraft.server.v1_16_R2.ArgumentVec2I;
-import net.minecraft.server.v1_16_R2.ArgumentVec3;
-import net.minecraft.server.v1_16_R2.EntitySelector;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_16_R2.CraftServer;
+import org.bukkit.craftbukkit.v1_16_R2.entity.CraftPlayer;
+import org.bukkit.entity.Player;
 
-import java.util.EnumSet;
-import java.util.UUID;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
 
+@SuppressWarnings("ALL")
 public class CommandProviderImpl implements CommandProvider{
+    private final HashMap<String, LiteralCommandNode<CommandListenerWrapper>> nodes = new HashMap<>();
+    
+    private com.mojang.brigadier.CommandDispatcher<CommandListenerWrapper> dispatcher;
+    private CommandDispatcher dispatcherNMS;
+    
+    private static Method vanillaCommandsMethod;
+    
+    private void setDispathcer(){
+        if(dispatcher == null || dispatcherNMS==null){
+            DedicatedServer server = ((CraftServer) Bukkit.getServer()).getServer();
+            dispatcherNMS = server.getCommandDispatcher();
+            dispatcher = dispatcherNMS.a();
+        }
+    }
+    
+    static {
+        try{
+            vanillaCommandsMethod = CraftServer.class.getDeclaredMethod("setVanillaCommands", boolean.class);
+            vanillaCommandsMethod.setAccessible(true);
+        } catch(NoSuchMethodException e){
+            e.printStackTrace();
+        }
+    }
+    
     @Override
     public void registerCommand(LiteralNode node){
-        DedicatedServer server = ((CraftServer) Bukkit.getServer()).getServer();
-        CommandDispatcher commandDispatcher = server.getCommandDispatcher();
-        com.mojang.brigadier.CommandDispatcher<CommandListenerWrapper> a = commandDispatcher.a();
-        a.register((LiteralArgumentBuilder<CommandListenerWrapper>) addBranch(null, node));
+        setDispathcer();
+        nodes.put(node.getName(), dispatcher.register((LiteralArgumentBuilder<CommandListenerWrapper>) addBranch(null, node)));
+        reloadCommands();
     }
     
     @Override
     public void unregisterCommand(String commandName){
-        DedicatedServer server = ((CraftServer) Bukkit.getServer()).getServer();
-        CommandDispatcher commandDispatcher = server.getCommandDispatcher();
-        com.mojang.brigadier.CommandDispatcher<CommandListenerWrapper> a = commandDispatcher.a();
-        a.getRoot().removeCommand(commandName);
+        setDispathcer();
+        dispatcher.getRoot().removeCommand(commandName);
+        reloadCommands();
+    }
+    
+    @Override
+    public void registerCommand(LiteralNode node, String path){
+        setDispathcer();
+        if(path.isEmpty()){
+            nodes.put(node.getName(), dispatcher.register((LiteralArgumentBuilder<CommandListenerWrapper>) addBranch(null, node)));
+            return;
+        }
+        int endIndex = path.indexOf('.');
+        endIndex = endIndex==-1 ? path.length() : endIndex;
+        String commandName = path.substring(0, endIndex);
+        String[] splitPath = endIndex==path.length() ? new String[0] : path.substring(endIndex+1).split("\\.");
+        LiteralCommandNode<CommandListenerWrapper> commandNode = nodes.get(commandName);
+        if(commandNode!=null){
+            CommandNode<CommandListenerWrapper> currentNode = commandNode;
+            pathLoop:
+            for(String s : splitPath){
+                List<CommandNode<CommandListenerWrapper>> children = new ArrayList<>(currentNode.getChildren());
+                for(CommandNode<CommandListenerWrapper> child : children){
+                    if(child.getName().equals(s)){
+                        currentNode = child;
+                        continue pathLoop;
+                    }
+                }
+                LiteralArgumentBuilder<CommandListenerWrapper> builder = LiteralArgumentBuilder.literal(s);
+                LiteralCommandNode<CommandListenerWrapper> build = builder.build();
+                currentNode.addChild(build);
+                currentNode = build;
+            }
+            currentNode.addChild(addBranch(null, node).build());
+        }else{
+            LiteralNode masterNode = new LiteralNode(commandName);
+            Node<?> currentNode = masterNode;
+            for(String s : splitPath){
+                LiteralNode node1 = new LiteralNode(s);
+                currentNode.addChild(node1);
+                currentNode = node1;
+            }
+            currentNode.addChild(node);
+            
+            nodes.put(masterNode.getName(), dispatcher.register((LiteralArgumentBuilder<CommandListenerWrapper>) addBranch(null, masterNode)));
+        }
+        reloadCommands();
+    }
+    
+    @Override
+    public void reloadCommands(){
+        try{
+            vanillaCommandsMethod.invoke(Bukkit.getServer(), false);
+        } catch(IllegalAccessException | InvocationTargetException e){
+            e.printStackTrace();
+        }
+        for(Player onlinePlayer : Bukkit.getOnlinePlayers()){
+            EntityPlayer handle = ((CraftPlayer) onlinePlayer).getHandle();
+            dispatcherNMS.a(handle);
+        }
     }
     
     @Override
@@ -41,11 +120,11 @@ public class CommandProviderImpl implements CommandProvider{
     }
     
     @Override
-    public Class<?> returnClassFromType(ArgumentTypeEnum type){
+    public Class<?> returnClassFromType(ArgumentType type){
         switch(type){
             case STRING_WORD:
             case STRING_GREEDY:
-            case STRING_STRING:
+            case STRING:
             case OBJECTIVE:
             case TEAM:
                 return String.class;
@@ -126,7 +205,7 @@ public class CommandProviderImpl implements CommandProvider{
         return null;
     }
     
-    private ArgumentBuilder<CommandListenerWrapper, ?> addBranch(ArgumentBuilder<CommandListenerWrapper, ?> commandBuilder, Node nodeArg){
+    private ArgumentBuilder<CommandListenerWrapper, ?> addBranch(ArgumentBuilder<CommandListenerWrapper, ?> commandBuilder, Node<?> nodeArg){
         if(nodeArg==null || nodeArg.getName()==null || nodeArg.getName().isEmpty()){
             throw new NullPointerException("Node cannot be null or have an empty name");
         }
@@ -151,7 +230,7 @@ public class CommandProviderImpl implements CommandProvider{
             });
         }
         for(int i = 0; i < nodeArg.getChildren().size(); i++){
-            addBranch(argumentBuilder, ((Node) nodeArg.getChildren().get(i)));
+            addBranch(argumentBuilder, ((Node<?>) nodeArg.getChildren().get(i)));
         }
         if(commandBuilder==null) return argumentBuilder;
         else {
@@ -160,13 +239,13 @@ public class CommandProviderImpl implements CommandProvider{
         }
     }
     
-    public ArgumentType toNMSArgument(ArgumentNode argumentType){
+    public com.mojang.brigadier.arguments.ArgumentType<?> toNMSArgument(ArgumentNode argumentType){
         switch(argumentType.getType()){
             case STRING_WORD:
                 return StringArgumentType.word();
             case STRING_GREEDY:
                 return StringArgumentType.greedyString();
-            case STRING_STRING:
+            case STRING:
                 return StringArgumentType.string();
             case INTEGER:
                 return IntegerArgumentType.integer(argumentType.getMinI(), argumentType.getMaxI());

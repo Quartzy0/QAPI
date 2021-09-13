@@ -58,14 +58,8 @@ public class GameProfile {
             }
 
             if (this.name != null) {
-                if (this.name.equals(var2.name)) {
-                    return true;
-                }
-            } else if (var2.name == null) {
-                return true;
-            }
-
-            return false;
+                return this.name.equals(var2.name);
+            } else return var2.name == null;
         } else {
             return false;
         }

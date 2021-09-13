@@ -46,6 +46,6 @@ public class CommandSenderInfo_v1_13_R1 implements CommandSenderInfo{
     
     @Override
     public boolean isPlayer(){
-        return wrapper.getBukkitSender() instanceof Player;
+        return (wrapper.getBukkitSender() instanceof Player);
     }
 }

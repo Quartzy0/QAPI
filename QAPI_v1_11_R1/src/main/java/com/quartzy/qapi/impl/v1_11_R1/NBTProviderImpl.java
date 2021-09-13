@@ -18,7 +18,6 @@ import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.UUID;
 
 public class NBTProviderImpl implements NBTProvider{
@@ -186,7 +185,7 @@ public class NBTProviderImpl implements NBTProvider{
         return createEndTag();
     }
     
-    private NBTBase fromNMS(net.minecraft.server.v1_11_R1.NBTBase base){
+    public NBTBase fromNMS(net.minecraft.server.v1_11_R1.NBTBase base){
         if(base==null)return null;
         switch(base.getTypeId()){
             case 1:

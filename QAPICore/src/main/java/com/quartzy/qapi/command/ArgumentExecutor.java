@@ -9,4 +9,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ArgumentExecutor{
     String value();
+    
+    int permissionLevel() default 4;
+    
+    String permission() default "";
 }

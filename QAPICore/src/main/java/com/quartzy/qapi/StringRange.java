@@ -71,7 +71,7 @@ public class StringRange {
     }
     
     public int hashCode() {
-        return Objects.hash(new Object[]{this.start, this.end});
+        return Objects.hash(this.start, this.end);
     }
     
     public String toString() {

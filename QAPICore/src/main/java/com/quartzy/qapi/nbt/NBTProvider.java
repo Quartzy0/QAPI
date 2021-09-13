@@ -1,6 +1,5 @@
 package com.quartzy.qapi.nbt;
 
-import com.quartzy.qapi.nbt.list.NBTListInt;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 

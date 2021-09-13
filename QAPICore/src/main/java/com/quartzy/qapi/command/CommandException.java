@@ -3,7 +3,6 @@ package com.quartzy.qapi.command;
 import com.quartzy.qapi.QAPI;
 import com.quartzy.qapi.StringRange;
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.TranslatableComponent;
 import org.bukkit.ChatColor;
@@ -12,10 +11,10 @@ public class CommandException extends Exception{
     
     public static final int ERROR_COMMAND_OUT_LENGTH = 40;
     
-    private String argument;
-    private int index;
-    private Object[] args;
-    private boolean translated;
+    private final String argument;
+    private final int index;
+    private final Object[] args;
+    private final boolean translated;
     
     public CommandException(String argument, String message, Object... args) {
         super(String.format(message, args));

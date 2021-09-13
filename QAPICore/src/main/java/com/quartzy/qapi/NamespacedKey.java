@@ -14,13 +14,6 @@ public class NamespacedKey{
     
     private final String namespace;
     private final String key;
-    
-    /**
-     * Create a key in a specific namespace.
-     *
-     * @param namespace
-     * @param key
-     */
     public NamespacedKey(String namespace, String key) {
         Validate.isTrue(namespace != null && VALID_NAMESPACE.matcher(namespace).matches(), "Invalid namespace. Must be [a-z0-9._-]: ", namespace);
         Validate.isTrue(key != null && VALID_KEY.matcher(key).matches(), "Invalid key. Must be [a-z0-9/._-]: ", key);

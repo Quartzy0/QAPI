@@ -3,38 +3,45 @@ package com.quartzy.qapi.impl.v1_8_R1;
 import com.quartzy.qapi.command.CommandSenderInfo;
 import com.quartzy.qapi.command.Node;
 import net.minecraft.server.v1_8_R1.ICommandListener;
-import org.bukkit.Bukkit;
+import net.minecraft.server.v1_8_R1.MinecraftServer;
 import org.bukkit.World;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.command.*;
 import org.bukkit.craftbukkit.v1_8_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_8_R1.command.CraftBlockCommandSender;
-import org.bukkit.craftbukkit.v1_8_R1.command.CraftConsoleCommandSender;
-import org.bukkit.craftbukkit.v1_8_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_8_R1.command.ProxiedNativeCommandSender;
 import org.bukkit.craftbukkit.v1_8_R1.entity.CraftMinecartCommand;
+import org.bukkit.craftbukkit.v1_8_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.util.Vector;
 
 public class CommandSenderInfo_v1_8_R1 implements CommandSenderInfo{
-    private CommandSender sender;
+    private final CommandSender sender;
     private ICommandListener listener;
-    private Node node;
+    private final Node<?> node;
     
-    public CommandSenderInfo_v1_8_R1(CommandSender sender, Node node){
+    public CommandSenderInfo_v1_8_R1(CommandSender sender, Node<?> node){
         this.sender = sender;
-        if(sender instanceof CraftEntity){
-            this.listener = ((CraftEntity) sender).getHandle();
-        }else if(sender instanceof CraftBlockCommandSender){
-            this.listener = ((CraftBlockCommandSender) sender).getTileEntity();
-        }else if(sender instanceof CommandMinecart){
-            this.listener = ((CraftMinecartCommand) sender).getHandle();
+        if (sender instanceof Player) {
+            this.listener = ((CraftPlayer)sender).getHandle();
+        } else if (sender instanceof BlockCommandSender) {
+            this.listener =  ((CraftBlockCommandSender)sender).getTileEntity();
+        } else if (sender instanceof CommandMinecart) {
+            this.listener =  ((CraftMinecartCommand)sender).getHandle();
+        } else if (sender instanceof RemoteConsoleCommandSender) {
+            this.listener = MinecraftServer.getServer();
+        } else if (sender instanceof ConsoleCommandSender) {
+            this.listener = ((CraftServer)sender.getServer()).getServer();
+        } else if (sender instanceof ProxiedCommandSender) {
+            this.listener = ((ProxiedNativeCommandSender)sender).getHandle();
         }
+        
         this.node = node;
     }
     
     @Override
     public boolean hasPermission(int level, String bukkitPerm){
+        if(!bukkitPerm.isEmpty())return sender.hasPermission(bukkitPerm);
         return this.listener.a(level, bukkitPerm);
     }
     
@@ -65,14 +72,10 @@ public class CommandSenderInfo_v1_8_R1 implements CommandSenderInfo{
     
     @Override
     public boolean isPlayer(){
-        return getSender() instanceof Player;
+        return (getSender() instanceof Player);
     }
     
     public ICommandListener getListener(){
         return listener;
-    }
-    
-    public Node getNode(){
-        return node;
     }
 }

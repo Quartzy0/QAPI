@@ -49,7 +49,7 @@ public class ScoreCriteria {
       return this.renderType;
    }
 
-   public static enum RenderType {
+   public enum RenderType {
       INTEGER("integer"),
       HEARTS("hearts");
 

@@ -152,7 +152,7 @@ public class NBTCompound implements NBTBase{
     public UUID getUUID(String name){
         try{
             if(hasKeyOfType(name, NBTListInt.class))
-                return QAPI.nbtProvider().deserializeUUID((NBTListInt) this.tags.get(name));
+                return QAPI.nbtProvider().deserializeUUID(this.tags.get(name));
         } catch(ClassCastException e){
             //Ignore
         }

@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public abstract class Node<T extends Node<T>>{
-    protected List<Node> children;
+    protected final List<Node<?>> children;
     protected Predicate<CommandSenderInfo> requirement;
     protected Executor executor;
-    protected String name;
+    protected final String name;
     
     public Node(String name){
         this.children = new ArrayList<>();
@@ -25,14 +25,14 @@ public abstract class Node<T extends Node<T>>{
     
     public abstract T getThis();
     
-    public T require(Predicate<CommandSenderInfo> requirement){
+    public void require(Predicate<CommandSenderInfo> requirement){
         this.requirement = requirement;
-        return getThis();
+        getThis();
     }
     
-    public T executes(Executor executor){
+    public void executes(Executor executor){
         this.executor = executor;
-        return getThis();
+        getThis();
     }
     
     public Executor getExecutor(){
@@ -44,11 +44,11 @@ public abstract class Node<T extends Node<T>>{
         return getThis();
     }
     
-    public List<Node> getChildren(){
+    public List<Node<?>> getChildren(){
         return this.children;
     }
     
-    public void addChild(Node node){
+    public void addChild(Node<?> node){
         this.children.add(node);
     }
     
