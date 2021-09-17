@@ -25,7 +25,6 @@ public class CommandProviderImpl implements CommandProvider{
     
     private final HashMap<String, CommandController> commandControllers = new HashMap<>();
     
-    @Override
     public void registerCommand(LiteralNode node){
         CommandController command = new CommandController(node);
         commandControllers.put(node.getName(), command);

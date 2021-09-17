@@ -57,13 +57,6 @@ public class CommandProviderImpl implements CommandProvider{
     }
     
     @Override
-    public void registerCommand(LiteralNode node){
-        setDispathcer();
-        nodes.put(node.getName(), dispatcher.register((LiteralArgumentBuilder<CommandListenerWrapper>) addBranch(null, node)));
-        reloadCommands();
-    }
-    
-    @Override
     public void unregisterCommand(String commandName){
         setDispathcer();
         dispatcher.getRoot().removeCommand(commandName);
