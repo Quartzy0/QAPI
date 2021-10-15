@@ -9,6 +9,9 @@ import java.security.*;
 import java.util.Base64;
 import java.util.UUID;
 
+/**
+ * Represents a player's profile
+ */
 public class GameProfile {
     private final UUID id;
     private final String name;

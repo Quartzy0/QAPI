@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Predicate;
@@ -143,7 +144,14 @@ public class CommandHandler{
                             continue methodLoop;
                         }
                     } else{
-                        newNode = new LiteralNode(pathNames[i1]);
+                        String pathName = pathNames[i1];
+                        if(pathName.contains("|")){
+                            String[] split = pathName.split("\\|");
+                            String[] aliases = Arrays.copyOfRange(split, 1, split.length);
+                            newNode = new LiteralNode(split[0], aliases);
+                        }else{
+                            newNode = new LiteralNode(pathName);
+                        }
                     }
                     currentNode.addChild(newNode);
                     currentNode = newNode;

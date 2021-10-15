@@ -10,7 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-@CommandExecutor("simplecmd.supercool.epic.victory.royale")
+@CommandExecutor("simplecmd|smpl.supercool.epic.victory.royale")
 public class SimpleCommand extends Command{
     
     @ArgumentExecutor("str.target")
@@ -54,6 +54,11 @@ public class SimpleCommand extends Command{
         public void sendMsg(@Argument(name = "item", type = ArgumentType.ITEM_STACK) ItemStack s,
                             @Sender Player sender){
             sender.getInventory().addItem(s);
+        }
+        
+        @ArgumentExecutor("alias.num|number.int")
+        public void aliasTest(@Argument(name = "int", type = ArgumentType.INTEGER) int i){
+            System.out.println(i);
         }
     }
 }

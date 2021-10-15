@@ -7,6 +7,9 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 
+/**
+ * The possible criteria a scoreboard objective may have
+ */
 public class ScoreCriteria {
    public static final Map<String, ScoreCriteria> INSTANCES = Maps.newHashMap();
    public static final ScoreCriteria DUMMY = new ScoreCriteria("dummy");
@@ -53,29 +56,29 @@ public class ScoreCriteria {
       INTEGER("integer"),
       HEARTS("hearts");
 
-      private final String field_211840_c;
-      private static final Map<String, ScoreCriteria.RenderType> field_211841_d;
+      private final String id;
+      private static final Map<String, ScoreCriteria.RenderType> renderTypeById;
 
-      RenderType(String p_i49784_3_) {
-         this.field_211840_c = p_i49784_3_;
+      RenderType(String id) {
+         this.id = id;
       }
 
       public String getId() {
-         return this.field_211840_c;
+         return this.id;
       }
 
-      public static ScoreCriteria.RenderType byId(String p_211839_0_) {
-         return field_211841_d.getOrDefault(p_211839_0_, INTEGER);
+      public static ScoreCriteria.RenderType byId(String id) {
+         return renderTypeById.getOrDefault(id, INTEGER);
       }
 
       static {
          Builder<String, ScoreCriteria.RenderType> builder = ImmutableMap.builder();
 
-         for(ScoreCriteria.RenderType scorecriteria$rendertype : values()) {
-            builder.put(scorecriteria$rendertype.field_211840_c, scorecriteria$rendertype);
+         for(ScoreCriteria.RenderType renderType : values()) {
+            builder.put(renderType.id, renderType);
          }
 
-         field_211841_d = builder.build();
+         renderTypeById = builder.build();
       }
    }
 }

@@ -1,9 +1,7 @@
 package com.quartzy.qapi;
 
 import com.quartzy.qapi.command.CommandHandler;
-import com.quartzy.qapi.test.TestBlock;
-import com.quartzy.qapi.test.TestItem;
-import com.quartzy.qapi.test.TestLocation;
+import com.quartzy.qapi.test.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -19,7 +17,7 @@ import java.nio.file.Files;
 import java.util.*;
 
 public class PerformTests implements CommandExecutor{
-    public static final List<Class<? extends CommandTest>> testClasses = Collections.unmodifiableList(Arrays.asList(TestItem.class, TestBlock.class, TestLocation.class));
+    public static final List<Class<? extends CommandTest>> testClasses = Collections.unmodifiableList(Arrays.asList(TestItem.class, TestBlock.class, TestLocation.class, TestGeneral.class, TestChat.class));
     private static final File resultsFile = new File("testResults.properties");
     
     private long lastMs = -1L;
@@ -78,12 +76,12 @@ public class PerformTests implements CommandExecutor{
         }
         if(allSuccess) msg(sender, "All tests finished successfully " + end());
         else msg(sender, "Some tests did not finish successfully " + end());
-        msg(sender, "Removing test commands");
-        start();
-        for(CommandContainer container : containers){
-            CommandHandler.removeCommand(container.name);
-        }
-        msg(sender, "Test commands removed successfully " + end());
+//        msg(sender, "Removing test commands");
+//        start();
+//        for(CommandContainer container : containers){
+//            CommandHandler.removeCommand(container.name);
+//        }
+//        msg(sender, "Test commands removed successfully " + end());
         return true;
     }
     
@@ -124,7 +122,9 @@ public class PerformTests implements CommandExecutor{
                 if(declaredMethod.isAnnotationPresent(TestExecutor.class)){
                     TestExecutor testExecutor = declaredMethod.getAnnotation(TestExecutor.class);
                     if(QAPI.version().lower(testExecutor.minVersion())) continue;
-                    test.add(fullPath + " " + testExecutor.value());
+                    for(String s : testExecutor.value()){
+                        test.add(fullPath + " " + s);
+                    }
                 }
             }
             

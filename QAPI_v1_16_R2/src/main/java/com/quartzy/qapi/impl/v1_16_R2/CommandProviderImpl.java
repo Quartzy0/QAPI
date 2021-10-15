@@ -5,6 +5,7 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.mojang.brigadier.tree.RootCommandNode;
 import com.quartzy.qapi.command.*;
 import com.quartzy.qapi.command.ArgumentType;
 import net.minecraft.server.v1_16_R2.*;
@@ -13,18 +14,18 @@ import org.bukkit.craftbukkit.v1_16_R2.CraftServer;
 import org.bukkit.craftbukkit.v1_16_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
-@SuppressWarnings("ALL")
 public class CommandProviderImpl implements CommandProvider{
     private final HashMap<String, LiteralCommandNode<CommandListenerWrapper>> nodes = new HashMap<>();
-    
     private com.mojang.brigadier.CommandDispatcher<CommandListenerWrapper> dispatcher;
     private CommandDispatcher dispatcherNMS;
     
     private static Method vanillaCommandsMethod;
+    private static Field argumentsField;
     
     private void setDispathcer(){
         if(dispatcher == null || dispatcherNMS==null){
@@ -38,7 +39,10 @@ public class CommandProviderImpl implements CommandProvider{
         try{
             vanillaCommandsMethod = CraftServer.class.getDeclaredMethod("setVanillaCommands", boolean.class);
             vanillaCommandsMethod.setAccessible(true);
-        } catch(NoSuchMethodException e){
+            
+            argumentsField = ArgumentBuilder.class.getDeclaredField("arguments");
+            argumentsField.setAccessible(true);
+        } catch(NoSuchMethodException | NoSuchFieldException e){
             e.printStackTrace();
         }
     }
@@ -59,7 +63,9 @@ public class CommandProviderImpl implements CommandProvider{
         }
         int endIndex = path.indexOf('.');
         endIndex = endIndex==-1 ? path.length() : endIndex;
-        String commandName = path.substring(0, endIndex);
+        String[] commandNames = path.substring(0, endIndex).split("\\|");
+        String commandName = commandNames[0];
+        commandNames = Arrays.copyOfRange(commandNames, 1, commandNames.length);
         String[] splitPath = endIndex==path.length() ? new String[0] : path.substring(endIndex+1).split("\\.");
         LiteralCommandNode<CommandListenerWrapper> commandNode = nodes.get(commandName);
         if(commandNode!=null){
@@ -88,8 +94,14 @@ public class CommandProviderImpl implements CommandProvider{
                 currentNode = node1;
             }
             currentNode.addChild(node);
-            
-            nodes.put(masterNode.getName(), dispatcher.register((LiteralArgumentBuilder<CommandListenerWrapper>) addBranch(null, masterNode)));
+    
+            LiteralCommandNode<CommandListenerWrapper> literalNode = dispatcher.register((LiteralArgumentBuilder<CommandListenerWrapper>) addBranch(null, masterNode));
+            for(String alias : commandNames){
+                LiteralArgumentBuilder<CommandListenerWrapper> aliasLiteral = LiteralArgumentBuilder.literal(alias);
+                aliasLiteral.requires(literalNode.getRequirement()).redirect(literalNode);
+                dispatcher.register(aliasLiteral);
+            }
+            nodes.put(masterNode.getName(), literalNode);
         }
         reloadCommands();
     }
@@ -223,11 +235,31 @@ public class CommandProviderImpl implements CommandProvider{
             });
         }
         for(int i = 0; i < nodeArg.getChildren().size(); i++){
-            addBranch(argumentBuilder, ((Node<?>) nodeArg.getChildren().get(i)));
+            addBranch(argumentBuilder, nodeArg.getChildren().get(i));
         }
-        if(commandBuilder==null) return argumentBuilder;
+        if(commandBuilder==null)
+            return argumentBuilder;
         else {
-            commandBuilder.then(argumentBuilder);
+            if(nodeArg instanceof LiteralNode && ((LiteralNode) nodeArg).getAliases()!=null){
+                LiteralNode nodeArgLit = (LiteralNode) nodeArg;
+    
+                CommandNode<CommandListenerWrapper> build = argumentBuilder.build();
+                List<CommandNode<CommandListenerWrapper>> commandNodes = new ArrayList<>(nodeArgLit.getAliases().length+1);
+                commandNodes.add(build);
+    
+                for(String alias : nodeArgLit.getAliases()){
+                    commandNodes.add(new LiteralCommandNode<>(alias, build.getCommand(), build.getRequirement(), build, null, false));
+                }
+                try{
+                    for(CommandNode<CommandListenerWrapper> commandNode : commandNodes){
+                        ((RootCommandNode<CommandListenerWrapper>) argumentsField.get(commandBuilder)).addChild(commandNode);
+                    }
+                } catch(IllegalAccessException e){
+                    e.printStackTrace();
+                }
+            }else{
+                commandBuilder.then(argumentBuilder);
+            }
             return commandBuilder;
         }
     }

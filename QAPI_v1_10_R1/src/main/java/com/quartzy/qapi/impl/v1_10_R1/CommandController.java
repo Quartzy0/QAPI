@@ -129,7 +129,7 @@ public class CommandController extends org.bukkit.command.Command{
                             break;
                         case COLOR:
                             range.setEnd(indexOf(args, offset));
-                            ChatColor byChar = ChatColor.getByChar(range.getTrim(args));
+                            ChatColor byChar = ColorUtil.parseColorWithNull(range.getTrim(args));
                             if(byChar == null){
                                 throw new CommandException("The color input is not valid");
                             }
@@ -534,8 +534,15 @@ public class CommandController extends org.bukkit.command.Command{
             }else if(finalNode instanceof LiteralNode){
                 StringRange range = new StringRange(offset, indexOf(args, offset));
                 ParsedArgument argument = new ParsedArgument(null, range, finalNode.getName());
-                if(finalNode.getName().equalsIgnoreCase(range.getTrim(args))){
-                    argument.value = range.getTrim(args);
+                String trim = range.getTrim(args);
+                boolean nameEquals = finalNode.getName().equalsIgnoreCase(trim);
+    
+                for(int i = 0; ((LiteralNode) finalNode).getAliases()!=null && i < ((LiteralNode) finalNode).getAliases().length && !nameEquals; i++){
+                    nameEquals = ((LiteralNode) finalNode).getAliases()[i].equalsIgnoreCase(trim);
+                }
+    
+                if(nameEquals){
+                    argument.value = trim;
                     arguments.put(finalNode.getName(), argument);
                     parse(finalNode, args, range.getEnd()+1, executorInfo, true);
                     return;
